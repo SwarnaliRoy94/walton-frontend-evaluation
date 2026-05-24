@@ -19,16 +19,17 @@ function ProductCard({ product }: Props) {
   const imageUrl = product.images?.[0]?.url;
 
   const mrpPrice = variant?.mrpPrice ?? 0;
-  const sellingPrice = variant?.discount?.value ?? mrpPrice;
-  const hasDiscount = variant?.discount != null;
-  const discountType = variant?.discount?.type;
-  const discountAmount = variant?.discount?.amount ?? 0;
+  const discount = variant?.discount;
+  const hasDiscount = discount != null && discount.amount > 0;
+  const discountType = discount?.type;
+  const discountAmount = discount?.amount ?? 0;
+  const sellingPrice = hasDiscount ? discount?.value ?? mrpPrice : mrpPrice;
   const isOutOfStock = (variant?.quantity ?? 0) === 0;
 
   const discountLabel =
-    hasDiscount && discountType === "percentage" && discountAmount > 0
+    hasDiscount && discountType === "percentage"
       ? `${discountAmount}% OFF`
-      : hasDiscount && discountType === "flat" && discountAmount > 0
+      : hasDiscount && discountType === "flat"
       ? `৳${discountAmount} OFF`
       : null;
 
