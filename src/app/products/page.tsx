@@ -58,10 +58,10 @@ export default function ProductListingPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
+      <div className="bg-white/100 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">
+            <h1 className="text-xl font-semibold text-slate-800 tracking-tight">
               Products
             </h1>
             {!loading && (
