@@ -1,3 +1,4 @@
+import "./globals.css";
 import ApolloWrapper from "@/lib/apolloWrapper";
 
 export default function RootLayout({
@@ -8,9 +9,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ApolloWrapper>
-          {children}
-        </ApolloWrapper>
+        <ApolloWrapper>{children}</ApolloWrapper>
       </body>
     </html>
   );
