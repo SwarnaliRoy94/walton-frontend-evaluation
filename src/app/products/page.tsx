@@ -178,19 +178,47 @@ export default function ProductListingPage() {
                   Previous
                 </button>
 
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
-                      page === i
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+                {(() => {
+                  const pages: (number | "...")[] = [];
+                  if (totalPages <= 7) {
+                    for (let i = 0; i < totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(0);
+                    if (page > 3) pages.push("...");
+                    for (
+                      let i = Math.max(1, page - 1);
+                      i <= Math.min(totalPages - 2, page + 1);
+                      i++
+                    ) {
+                      pages.push(i);
+                    }
+                    if (page < totalPages - 4) pages.push("...");
+                    pages.push(totalPages - 1);
+                  }
+
+                  return pages.map((p, i) =>
+                    p === "..." ? (
+                      <span
+                        key={`ellipsis-${i}`}
+                        className="w-9 h-9 flex items-center justify-center text-slate-400 text-sm"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p as number)}
+                        className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
+                          page === p
+                            ? "bg-indigo-600 text-white shadow-sm"
+                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        {(p as number) + 1}
+                      </button>
+                    )
+                  );
+                })()}
 
                 <button
                   onClick={() =>
