@@ -1,14 +1,13 @@
 "use client";
 
-import { useQuery } from "@apollo/client";
-import { useParams } from "next/navigation";
-import { useState, useOptimistic, useTransition } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { GET_PRODUCT_DETAIL } from "@/graphql/queries";
-import { GetProductsResponse, ProductVariant, ProductAttribute } from "@/types";
-import { useCartStore } from "@/store/cartStore";
 import ProductImageGallery from "@/components/ProductImageGallery";
+import { GET_PRODUCT_DETAIL } from "@/graphql/queries";
+import { useCartStore } from "@/store/cartStore";
+import { GetProductsResponse, ProductAttribute, ProductVariant } from "@/types";
+import { useQuery } from "@apollo/client";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useOptimistic, useState, useTransition } from "react";
 
 function AttributeSection({
   title,
@@ -30,9 +29,12 @@ function AttributeSection({
             }`}
           >
             <span className="text-slate-500 w-40 shrink-0">{attr.enLabel}</span>
-            <span className="text-slate-800">
-              {attr.values.map((v) => v.enName).join(", ")}
-            </span>
+            <span
+              className="text-slate-800 prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{
+                __html: attr.values.map((v) => v.enName).join(", "),
+              }}
+            />
           </div>
         ))}
       </div>
@@ -40,11 +42,10 @@ function AttributeSection({
   );
 }
 
-export default function ProductDetailPage() {
+const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPending, startTransition] = useTransition();
 
   const addItem = useCartStore((s) => s.addItem);
@@ -294,4 +295,6 @@ export default function ProductDetailPage() {
       </div>
     </main>
   );
-}
+};
+
+export default ProductDetailPage;
