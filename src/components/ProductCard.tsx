@@ -11,7 +11,7 @@ import {
 } from "@/lib/pricing";
 import Image from "next/image";
 import Link from "next/link";
-import { memo } from "react";
+import { memo, useState } from "react";
 
 interface Props {
   product: Product;
@@ -23,7 +23,14 @@ const ProductCard = ({ product }: Props) => {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const cartItems = useCartStore((s) => s.items);
 
-  const variant = pickDisplayVariant(product.variants);
+  const variants = product.variants ?? [];
+  const defaultVariant = pickDisplayVariant(variants);
+  const [selectedVariantCode, setSelectedVariantCode] = useState<string | null>(
+    () => defaultVariant?.posItemCode ?? null
+  );
+  const variant =
+    variants.find((v) => v.posItemCode === selectedVariantCode) ??
+    defaultVariant;
   const imageUrl = product.images?.[0]?.url;
 
   const mrpPrice = variant?.mrpPrice ?? 0;
@@ -102,6 +109,30 @@ const ProductCard = ({ product }: Props) => {
             {product.enName}
           </h2>
         </Link>
+
+        {variants.length > 1 && (
+          <div className="flex flex-wrap gap-1.5">
+            {variants.map((v) => {
+              const optionOutOfStock = getVariantStock(v) === 0;
+              return (
+                <button
+                  key={v.posItemCode}
+                  onClick={() => setSelectedVariantCode(v.posItemCode)}
+                  disabled={optionOutOfStock}
+                  className={`px-2 py-1 text-[11px] rounded-lg border transition ${
+                    variant?.posItemCode === v.posItemCode
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  } ${
+                    optionOutOfStock ? "opacity-40 cursor-not-allowed" : ""
+                  }`}
+                >
+                  ৳{getSellingPrice(v).toLocaleString()}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Price */}
         <div className="flex items-start mt-auto">

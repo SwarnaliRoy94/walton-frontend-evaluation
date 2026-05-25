@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { GET_PRODUCTS } from "@/graphql/queries";
 import { GetProductsResponse, Product } from "@/types";
 import { getSellingPrice, pickDisplayVariant } from "@/lib/pricing";
