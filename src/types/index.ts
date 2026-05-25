@@ -14,7 +14,7 @@ export interface ProductAttribute {
 export interface Discount {
   amount: number;
   value: number;
-  type: "flat" | "percentage";
+  type: string;
 }
 
 export interface ProductVariant {
@@ -23,6 +23,10 @@ export interface ProductVariant {
   posItemCode: string;
   quantity: number;
   discount: Discount | null;
+}
+
+export interface ProductRating {
+  average: number | null;
 }
 
 export interface Product {
@@ -34,6 +38,7 @@ export interface Product {
   deliveries: ProductAttribute[] | null;
   serviceAndDeliveries: ProductAttribute[] | null;
   priceAndStocks: ProductAttribute[] | null;
+  rating?: ProductRating | null;
   variants: ProductVariant[];
 }
 

@@ -1,4 +1,4 @@
-export default function ProductSkeleton() {
+const ProductSkeleton = () => {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden animate-pulse">
       <div className="aspect-square bg-slate-100" />
@@ -10,4 +10,6 @@ export default function ProductSkeleton() {
       </div>
     </div>
   );
-}
+};
+
+export default ProductSkeleton;

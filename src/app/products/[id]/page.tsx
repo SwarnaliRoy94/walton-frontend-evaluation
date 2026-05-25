@@ -1,13 +1,10 @@
 "use client";
 
 import ProductImageGallery from "@/components/ProductImageGallery";
-import { GET_PRODUCT_DETAIL } from "@/graphql/queries";
-import { useCartStore } from "@/store/cartStore";
-import { GetProductsResponse, ProductAttribute, ProductVariant } from "@/types";
-import { useQuery } from "@apollo/client";
+import { getSellingPrice } from "@/lib/pricing";
+import { useProductDetail } from "@/hooks/useProductDetail";
+import { ProductAttribute } from "@/types";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
 
 const AttributeSection = ({
   title,
@@ -43,69 +40,40 @@ const AttributeSection = ({
 };
 
 const ProductDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState(0);
-
-  const addItem = useCartStore((s) => s.addItem);
-  const removeItem = useCartStore((s) => s.removeItem);
-  const updateQuantity = useCartStore((s) => s.updateQuantity);
-  const cartItems = useCartStore((s) => s.items);
-
-  const { data, loading, error } = useQuery<GetProductsResponse>(
-    GET_PRODUCT_DETAIL,
-    {
-      variables: { filter: { uid: id } },
-    }
-  );
-
-  const product = data?.getProducts?.result?.products?.[0];
-  const statusCode = data?.getProducts?.statusCode;
-  const message = data?.getProducts?.message;
-
-  const variants = product?.variants ?? [];
-  const selectedVariant: ProductVariant | undefined =
-    variants[selectedVariantIndex];
-
-  const mrpPrice = selectedVariant?.mrpPrice ?? 0;
-  const discount = selectedVariant?.discount;
-  const hasDiscount = discount != null && discount.amount > 0;
-  const sellingPrice = hasDiscount ? discount?.value ?? mrpPrice : mrpPrice;
-  const discountAmount = discount?.amount ?? 0;
-  const discountType = discount?.type;
-  const isOutOfStock = (selectedVariant?.quantity ?? 0) === 0;
-
-  const discountLabel =
-    hasDiscount && discountType === "percentage"
-      ? `${discountAmount}% OFF`
-      : hasDiscount && discountType === "flat"
-      ? `৳${discountAmount} OFF`
-      : null;
-
-  const cartItem = cartItems.find(
-    (i) => i.selectedVariant.posItemCode === selectedVariant?.posItemCode
-  );
-  const cartQuantity = cartItem?.quantity ?? 0;
-
-  const handleAddToCart = () => {
-    if (!product || !selectedVariant || isOutOfStock) return;
-    addItem(product, selectedVariant);
-  };
-
-  const tabs = [
-    { label: "Basic Info", data: product?.productAttributes },
-    { label: "Details", data: product?.detailedDescriptions },
-    { label: "Warranty", data: product?.serviceAndDeliveries },
-    { label: "Terms", data: product?.deliveries },
-  ].filter((t) => t.data && t.data.length > 0);
-
-  const images = product?.images ?? [];
+  const {
+    loading,
+    error,
+    product,
+    statusCode,
+    message,
+    variants,
+    selectedVariant,
+    mrpPrice,
+    sellingPrice,
+    discountLabel,
+    hasDiscount,
+    discountSummary,
+    isOutOfStock,
+    cartItem,
+    cartQuantity,
+    canIncreaseQuantity,
+    tabs,
+    activeTab,
+    specialFeatures,
+    images,
+    onVariantChange,
+    onActiveTabChange,
+    onAddToCart,
+    onDecreaseCartQuantity,
+    onIncreaseCartQuantity,
+    onRemoveFromCart,
+  } = useProductDetail();
 
   // Loading
   if (loading) {
     return (
-      <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <main className="page-shell">
+        <div className="detail-container">
           <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="aspect-square bg-white rounded-2xl" />
             <div className="flex flex-col gap-4">
@@ -123,7 +91,7 @@ const ProductDetailPage = () => {
   // Error
   if (error || statusCode !== 200 || !product) {
     return (
-      <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50 flex items-center justify-center">
+      <main className="page-shell flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-700 font-medium">
             {message ?? "Product not found"}
@@ -140,8 +108,8 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <main className="page-shell">
+      <div className="detail-container">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-400 mb-6">
           <Link
@@ -172,19 +140,21 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3">
+            <div className="flex items-start gap-3">
               <span className="text-3xl font-bold text-indigo-900">
                 ৳{sellingPrice.toLocaleString()}
               </span>
               {hasDiscount && (
-                <>
-                  <span className="text-lg text-slate-400 line-through">
+                <div className="ml-auto flex flex-col items-end gap-1 text-right">
+                  <span className="text-lg text-red-700 line-through">
                     ৳{mrpPrice.toLocaleString()}
                   </span>
-                  <span className="text-sm font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">
-                    {discountLabel}
-                  </span>
-                </>
+                  {discountSummary && (
+                    <span className="text-sm font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-200">
+                      {discountSummary}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -213,12 +183,12 @@ const ProductDetailPage = () => {
                   Select Variant
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {variants.map((v, i) => (
+                  {variants.map((v) => (
                     <button
                       key={v.posItemCode}
-                      onClick={() => setSelectedVariantIndex(i)}
+                      onClick={() => onVariantChange(v.posItemCode)}
                       className={`px-3 py-2 text-xs rounded-xl border transition ${
-                        selectedVariantIndex === i
+                        selectedVariant?.posItemCode === v.posItemCode
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
                           : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                       } ${
@@ -226,7 +196,7 @@ const ProductDetailPage = () => {
                       }`}
                       disabled={v.quantity === 0}
                     >
-                      ৳{(v.discount?.value ?? v.mrpPrice).toLocaleString()}
+                      ৳{getSellingPrice(v).toLocaleString()}
                       {v.quantity === 0 && " (Out of stock)"}
                     </button>
                   ))}
@@ -241,43 +211,30 @@ const ProductDetailPage = () => {
                   <span className="text-left">Added to cart</span>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() =>
-                        cartQuantity === 1
-                          ? removeItem(cartItem.selectedVariant.posItemCode)
-                          : updateQuantity(
-                              cartItem.selectedVariant.posItemCode,
-                              cartQuantity - 1
-                            )
-                      }
-                      className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                      onClick={onDecreaseCartQuantity}
+                      className="qty-button"
                       aria-label="Decrease quantity"
                     >
                       −
                     </button>
-                    <span className="text-sm font-medium text-slate-700 w-5 text-center">
+                    <span className="qty-count">
                       {cartQuantity}
                     </span>
                     <button
-                      onClick={() =>
-                        updateQuantity(
-                          cartItem.selectedVariant.posItemCode,
-                          cartQuantity + 1
-                        )
-                      }
-                      className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                      onClick={onIncreaseCartQuantity}
+                      disabled={!canIncreaseQuantity}
+                      className="qty-button-disabled"
                       aria-label="Increase quantity"
                     >
                       +
                     </button>
                     <button
-                      onClick={() =>
-                        removeItem(cartItem.selectedVariant.posItemCode)
-                      }
-                      className="text-slate-300 hover:text-red-400 transition"
+                      onClick={onRemoveFromCart}
+                      className="remove-item-button"
                       aria-label="Remove item"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="small-icon"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -294,7 +251,7 @@ const ProductDetailPage = () => {
                 </div>
               ) : (
                 <button
-                  onClick={handleAddToCart}
+                  onClick={onAddToCart}
                   disabled={isOutOfStock}
                   className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     isOutOfStock
@@ -309,6 +266,24 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
+        {/* Special Features */}
+        <div className="mt-10">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            {specialFeatures.length > 0 ? (
+              <AttributeSection title="Special Features" data={specialFeatures} />
+            ) : (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                  Special Features
+                </h3>
+                <p className="text-sm text-slate-500">
+                  No special features for this product is available.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Tabs Section */}
         {tabs.length > 0 && (
           <div className="mt-12">
@@ -317,7 +292,7 @@ const ProductDetailPage = () => {
               {tabs.map((tab, i) => (
                 <button
                   key={i}
-                  onClick={() => setActiveTab(i)}
+                  onClick={() => onActiveTabChange(i)}
                   className={`px-5 py-2.5 text-sm font-medium rounded-t-xl transition ${
                     activeTab === i
                       ? "bg-white border border-b-white border-slate-200 text-indigo-800 -mb-px"

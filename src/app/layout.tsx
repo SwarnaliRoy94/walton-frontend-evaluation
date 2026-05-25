@@ -8,7 +8,7 @@ import "./globals.css";
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
-      <body className="pt-16">
+      <body suppressHydrationWarning className="pt-16">
         <ApolloWrapper>
           <Header />
           {children}

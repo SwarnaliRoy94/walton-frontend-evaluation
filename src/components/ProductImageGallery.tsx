@@ -10,11 +10,11 @@ interface Props {
   discountLabel?: string | null;
 }
 
-export default function ProductImageGallery({
+const ProductImageGallery = ({
   images,
   productName,
   discountLabel,
-}: Props) {
+}: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const validImages = images.filter((img) => img.url);
@@ -57,12 +57,12 @@ export default function ProductImageGallery({
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain p-6 transition-opacity duration-300"
-          priority
+          loading="eager"
         />
 
         {/* Discount badge */}
         {discountLabel && (
-          <div className="absolute top-4 left-4 bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg z-10">
+          <div className="discount-ribbon top-5">
             {discountLabel}
           </div>
         )}
@@ -146,4 +146,6 @@ export default function ProductImageGallery({
       )}
     </div>
   );
-}
+};
+
+export default ProductImageGallery;

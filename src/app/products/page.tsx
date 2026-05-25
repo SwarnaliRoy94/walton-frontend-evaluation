@@ -1,65 +1,49 @@
 "use client";
 
-import { useQuery } from "@apollo/client";
-import { useState, useMemo } from "react";
-import { GET_PRODUCTS } from "@/graphql/queries";
-import { GetProductsResponse, Product } from "@/types";
+import {
+  ALL_FILTER_VALUE,
+  AVAILABILITY_FILTER_OPTIONS,
+  AvailabilityFilterValue,
+  PRICE_FILTER_OPTIONS,
+  PRODUCTS_PER_PAGE,
+  PriceFilterValue,
+  SORT_OPTIONS,
+  SortValue,
+} from "@/constants/productListing";
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
+import { useProductListing } from "@/hooks/useProductListing";
 
-const LIMIT = 12;
-
-const SORT_OPTIONS = [
-  { label: "Default", value: "default" },
-  { label: "Price: Low to High", value: "price_asc" },
-  { label: "Price: High to Low", value: "price_desc" },
-];
-
-export default function ProductListingPage() {
-  const [page, setPage] = useState<number>(0);
-  const [sort, setSort] = useState<string>("default");
-  const [search, setSearch] = useState<string>("");
-
-  const { data, loading, error } = useQuery<GetProductsResponse>(GET_PRODUCTS, {
-    variables: {
-      pagination: { skip: page * LIMIT, limit: LIMIT },
-      filter: { isActive: null },
-    },
-  });
-
-  const products = data?.getProducts?.result?.products ?? [];
-  const totalCount = data?.getProducts?.result?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / LIMIT);
-
-  const getPrice = (product: Product): number => {
-    const variant = product.variants?.[0];
-    if (!variant) return 0;
-    return variant.discount?.value ?? variant.mrpPrice;
-  };
-
-  const filteredAndSorted = useMemo(() => {
-    let result = [...products];
-
-    if (search.trim()) {
-      result = result.filter((p) =>
-        p.enName.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (sort === "price_asc") {
-      result.sort((a, b) => getPrice(a) - getPrice(b));
-    } else if (sort === "price_desc") {
-      result.sort((a, b) => getPrice(b) - getPrice(a));
-    }
-
-    return result;
-  }, [products, sort, search]);
+const ProductListingPage = () => {
+  const {
+    page,
+    sort,
+    search,
+    priceFilter,
+    categoryFilter,
+    availabilityFilter,
+    loading,
+    error,
+    totalCount,
+    totalPages,
+    categories,
+    filteredAndSorted,
+    paginationItems,
+    onSearchChange,
+    onCategoryFilterChange,
+    onPriceFilterChange,
+    onAvailabilityFilterChange,
+    onSortChange,
+    onPageChange,
+    onPreviousPage,
+    onNextPage,
+  } = useProductListing();
 
   return (
-    <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
+    <main className="page-shell">
       {/* Header */}
       <div className="bg-white/100 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="listing-container py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold text-indigo-900 tracking-tight">
               Products
@@ -71,24 +55,63 @@ export default function ProductListingPage() {
             )}
           </div>
 
-          <div className="flex gap-3 w-full sm:w-auto">
+          <div className="flex gap-3 w-full sm:w-auto flex-wrap">
             {/* Search */}
             <input
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(0);
-              }}
-              className="flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-400 bg-white/80 text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-transparent transition"
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="search-input"
             />
+
+            {/* Category */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => onCategoryFilterChange(e.target.value)}
+              className="filter-select"
+            >
+              <option value={ALL_FILTER_VALUE}>All categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            {/* Price */}
+            <select
+              value={priceFilter}
+              onChange={(e) => onPriceFilterChange(e.target.value as PriceFilterValue)}
+              className="filter-select"
+            >
+              {PRICE_FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            {/* Availability */}
+            <select
+              value={availabilityFilter}
+              onChange={(e) =>
+                onAvailabilityFilterChange(e.target.value as AvailabilityFilterValue)
+              }
+              className="filter-select"
+            >
+              {AVAILABILITY_FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
             {/* Sort */}
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+              onChange={(e) => onSortChange(e.target.value as SortValue)}
+              className="filter-select"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -100,7 +123,7 @@ export default function ProductListingPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="listing-container py-8">
         {/* Error */}
         {error && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -127,7 +150,7 @@ export default function ProductListingPage() {
         {/* Skeleton */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {Array.from({ length: LIMIT }).map((_, i) => (
+            {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
               <ProductSkeleton key={i} />
             ))}
           </div>
@@ -153,7 +176,7 @@ export default function ProductListingPage() {
             </div>
             <p className="text-slate-700 font-medium">No products found</p>
             <p className="text-slate-400 text-sm mt-1">
-              Try adjusting your search
+              Try adjusting your search or filters
             </p>
           </div>
         )}
@@ -162,8 +185,12 @@ export default function ProductListingPage() {
         {!loading && !error && filteredAndSorted.length > 0 && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {filteredAndSorted.map((product) => (
-                <ProductCard key={product.uid} product={product} />
+              {filteredAndSorted.map((product, index) => (
+                <ProductCard
+                  key={product.uid}
+                  product={product}
+                  imageLoading={index < 4 ? "eager" : "lazy"}
+                />
               ))}
             </div>
 
@@ -171,61 +198,40 @@ export default function ProductListingPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-12">
                 <button
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  onClick={onPreviousPage}
                   disabled={page === 0}
-                  className="px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="pagination-button"
                 >
                   Previous
                 </button>
 
-                {(() => {
-                  const pages: (number | "...")[] = [];
-                  if (totalPages <= 7) {
-                    for (let i = 0; i < totalPages; i++) pages.push(i);
-                  } else {
-                    pages.push(0);
-                    if (page > 3) pages.push("...");
-                    for (
-                      let i = Math.max(1, page - 1);
-                      i <= Math.min(totalPages - 2, page + 1);
-                      i++
-                    ) {
-                      pages.push(i);
-                    }
-                    if (page < totalPages - 4) pages.push("...");
-                    pages.push(totalPages - 1);
-                  }
-
-                  return pages.map((p, i) =>
-                    p === "..." ? (
-                      <span
-                        key={`ellipsis-${i}`}
-                        className="w-9 h-9 flex items-center justify-center text-slate-400 text-sm"
-                      >
-                        ...
-                      </span>
-                    ) : (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p as number)}
-                        className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
-                          page === p
-                            ? "bg-indigo-400 text-white shadow-sm"
-                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        {(p as number) + 1}
-                      </button>
-                    )
-                  );
-                })()}
+                {paginationItems.map((paginationItem, i) =>
+                  paginationItem === "..." ? (
+                    <span
+                      key={`ellipsis-${i}`}
+                      className="w-9 h-9 flex items-center justify-center text-slate-400 text-sm"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={paginationItem}
+                      onClick={() => onPageChange(paginationItem)}
+                      className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
+                        page === paginationItem
+                          ? "bg-indigo-400 text-white shadow-sm"
+                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {paginationItem + 1}
+                    </button>
+                  )
+                )}
 
                 <button
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages - 1, p + 1))
-                  }
+                  onClick={onNextPage}
                   disabled={page === totalPages - 1}
-                  className="px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="pagination-button"
                 >
                   Next
                 </button>
@@ -236,4 +242,6 @@ export default function ProductListingPage() {
       </div>
     </main>
   );
-}
+};
+
+export default ProductListingPage;

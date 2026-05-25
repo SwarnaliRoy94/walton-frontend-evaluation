@@ -1,54 +1,43 @@
 "use client";
 
-import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types";
+import { getSellingPrice, getVariantStock } from "@/lib/pricing";
+import { useProductCard } from "@/hooks/useProductCard";
 import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
 
 interface Props {
   product: Product;
+  imageLoading?: "lazy" | "eager";
 }
 
-function ProductCard({ product }: Props) {
-  const addItem = useCartStore((s) => s.addItem);
-  const removeItem = useCartStore((s) => s.removeItem);
-  const updateQuantity = useCartStore((s) => s.updateQuantity);
-  const cartItems = useCartStore((s) => s.items);
-
-  const variant = product.variants?.[0];
-  const imageUrl = product.images?.[0]?.url;
-
-  const mrpPrice = variant?.mrpPrice ?? 0;
-  const discount = variant?.discount;
-  const hasDiscount = discount != null && discount.amount > 0;
-  const discountType = discount?.type;
-  const discountAmount = discount?.amount ?? 0;
-  const sellingPrice = hasDiscount ? discount?.value ?? mrpPrice : mrpPrice;
-  const isOutOfStock = (variant?.quantity ?? 0) === 0;
-
-  const discountLabel =
-    hasDiscount && discountType === "percentage"
-      ? `${discountAmount}% OFF`
-      : hasDiscount && discountType === "flat"
-      ? `৳${discountAmount} OFF`
-      : null;
-
-  const cartItem = cartItems.find(
-    (i) => i.selectedVariant.posItemCode === variant?.posItemCode
-  );
-  const cartQuantity = cartItem?.quantity ?? 0;
-
-  const handleAddToCart = () => {
-    if (!variant || isOutOfStock) return;
-    addItem(product, variant);
-  };
+const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
+  const {
+    variants,
+    selectedVariant,
+    imageUrl,
+    mrpPrice,
+    sellingPrice,
+    discountLabel,
+    savingsText,
+    hasDiscount,
+    isOutOfStock,
+    cartItem,
+    cartQuantity,
+    canIncreaseQuantity,
+    onVariantSelect,
+    onAddToCart,
+    onDecreaseCartQuantity,
+    onIncreaseCartQuantity,
+    onRemoveFromCart,
+  } = useProductCard(product);
 
   return (
     <div className="group relative bg-slate-50 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
       {/* Discount Badge */}
       {discountLabel && (
-        <div className="absolute top-3 left-3 z-10 bg-indigo-600 text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+        <div className="discount-ribbon top-4">
           {discountLabel}
         </div>
       )}
@@ -72,6 +61,7 @@ function ProductCard({ product }: Props) {
               alt={product.enName}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              loading={imageLoading}
               className="object-contain bg-indigo-50 p-4 group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
@@ -102,15 +92,44 @@ function ProductCard({ product }: Props) {
           </h2>
         </Link>
 
+        {variants.length > 1 && (
+          <div className="flex flex-wrap gap-1.5">
+            {variants.map((v) => {
+              const optionOutOfStock = getVariantStock(v) === 0;
+              return (
+                <button
+                  key={v.posItemCode}
+                  onClick={() => onVariantSelect(v.posItemCode)}
+                  disabled={optionOutOfStock}
+                  className={`px-2 py-1 text-[11px] rounded-lg border transition ${
+                    selectedVariant?.posItemCode === v.posItemCode
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  } ${
+                    optionOutOfStock ? "opacity-40 cursor-not-allowed" : ""
+                  }`}
+                >
+                  ৳{getSellingPrice(v).toLocaleString()}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Price */}
-        <div className="flex items-baseline gap-2 mt-auto">
+        <div className="flex items-start mt-auto">
           <span className="text-base font-semibold text-indigo-900">
             ৳{sellingPrice.toLocaleString()}
           </span>
           {hasDiscount && (
-            <span className="text-xs text-slate-400 line-through">
-              ৳{mrpPrice.toLocaleString()}
-            </span>
+            <div className="ml-auto flex flex-col items-end text-right leading-tight">
+              <span className="text-sm text-red-700 line-through">
+                ৳{mrpPrice.toLocaleString()}
+              </span>
+              {savingsText && (
+                <span className="text-xs text-green-700">{savingsText}</span>
+              )}
+            </div>
           )}
         </div>
 
@@ -120,41 +139,30 @@ function ProductCard({ product }: Props) {
             <span className="text-left">Added to cart</span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() =>
-                  cartQuantity === 1
-                    ? removeItem(cartItem.selectedVariant.posItemCode)
-                    : updateQuantity(
-                        cartItem.selectedVariant.posItemCode,
-                        cartQuantity - 1
-                      )
-                }
-                className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                onClick={onDecreaseCartQuantity}
+                className="qty-button"
                 aria-label="Decrease quantity"
               >
                 −
               </button>
-              <span className="text-sm font-medium text-slate-700 w-5 text-center">
+              <span className="qty-count">
                 {cartQuantity}
               </span>
               <button
-                onClick={() =>
-                  updateQuantity(
-                    cartItem.selectedVariant.posItemCode,
-                    cartQuantity + 1
-                  )
-                }
-                className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                onClick={onIncreaseCartQuantity}
+                disabled={!canIncreaseQuantity}
+                className="qty-button-disabled"
                 aria-label="Increase quantity"
               >
                 +
               </button>
               <button
-                onClick={() => removeItem(cartItem.selectedVariant.posItemCode)}
-                className="text-slate-300 hover:text-red-400 transition"
+                onClick={onRemoveFromCart}
+                className="remove-item-button"
                 aria-label="Remove item"
               >
                 <svg
-                  className="w-4 h-4"
+                  className="small-icon"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -171,7 +179,7 @@ function ProductCard({ product }: Props) {
           </div>
         ) : (
           <button
-            onClick={handleAddToCart}
+            onClick={onAddToCart}
             disabled={isOutOfStock}
             className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
               isOutOfStock
@@ -185,6 +193,6 @@ function ProductCard({ product }: Props) {
       </div>
     </div>
   );
-}
+};
 
 export default memo(ProductCard);

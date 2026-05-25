@@ -24,3 +24,53 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50;
+  }
+
+  .listing-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6;
+  }
+
+  .detail-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 py-8;
+  }
+
+  .search-input {
+    @apply flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-transparent transition;
+  }
+
+  .filter-select {
+    @apply px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition;
+  }
+
+  .pagination-button {
+    @apply px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition;
+  }
+
+  .qty-button {
+    @apply w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium;
+  }
+
+  .qty-button-disabled {
+    @apply w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white;
+  }
+
+  .qty-count {
+    @apply text-sm font-medium text-slate-700 w-5 text-center;
+  }
+
+  .remove-item-button {
+    @apply text-slate-300 hover:text-red-400 transition;
+  }
+
+  .small-icon {
+    @apply w-4 h-4;
+  }
+
+  .discount-ribbon {
+    @apply absolute -left-10 z-10 w-32 -rotate-45 bg-green-50 text-red-700 border border-green-200 text-xs font-semibold tracking-wide text-center py-1.5 shadow-sm;
+  }
+}

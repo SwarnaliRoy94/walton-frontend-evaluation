@@ -1,5 +1,6 @@
 "use client";
 
+import { getSellingPrice, getVariantStock } from "@/lib/pricing";
 import { useCartStore } from "@/store/cartStore";
 import Image from "next/image";
 
@@ -8,12 +9,11 @@ interface Props {
   onClose: () => void;
 }
 
-export default function CartDrawer({ isOpen, onClose }: Props) {
+const CartDrawer = ({ isOpen, onClose }: Props) => {
   const { items, removeItem, updateQuantity, clearCart } = useCartStore();
 
   const total = items.reduce((sum, item) => {
-    const price =
-      item.selectedVariant.discount?.value ?? item.selectedVariant.mrpPrice;
+    const price = getSellingPrice(item.selectedVariant);
     return sum + price * item.quantity;
   }, 0);
 
@@ -91,9 +91,9 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
         {items.length > 0 && (
           <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
             {items.map((item) => {
-              const price =
-                item.selectedVariant.discount?.value ??
-                item.selectedVariant.mrpPrice;
+              const price = getSellingPrice(item.selectedVariant);
+              const maxStock = getVariantStock(item.selectedVariant);
+              const canIncreaseQuantity = item.quantity < maxStock;
               const imageUrl = item.product.images?.[0]?.url;
 
               return (
@@ -136,11 +136,11 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                                 item.quantity - 1
                               )
                         }
-                        className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                        className="qty-button"
                       >
                         −
                       </button>
-                      <span className="text-sm font-medium text-slate-700 w-5 text-center">
+                      <span className="qty-count">
                         {item.quantity}
                       </span>
                       <button
@@ -150,7 +150,8 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                             item.quantity + 1
                           )
                         }
-                        className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                        disabled={!canIncreaseQuantity}
+                        className="qty-button-disabled"
                       >
                         +
                       </button>
@@ -160,11 +161,11 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                         onClick={() =>
                           removeItem(item.selectedVariant.posItemCode)
                         }
-                        className="ml-auto text-slate-300 hover:text-red-400 transition"
+                        className="ml-auto remove-item-button"
                         aria-label="Remove item"
                       >
                         <svg
-                          className="w-4 h-4"
+                          className="small-icon"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -208,4 +209,6 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
       </div>
     </>
   );
-}
+};
+
+export default CartDrawer;
