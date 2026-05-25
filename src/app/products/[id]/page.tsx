@@ -103,6 +103,7 @@ const ProductDetailPage = () => {
     { label: "Warranty", data: product?.serviceAndDeliveries },
     { label: "Terms", data: product?.deliveries },
   ].filter((t) => t.data && t.data.length > 0);
+  const specialFeatures = product?.priceAndStocks ?? [];
 
   const images = product?.images ?? [];
 
@@ -316,6 +317,15 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Special Features */}
+        {specialFeatures.length > 0 && (
+          <div className="mt-10">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+              <AttributeSection title="Special Features" data={specialFeatures} />
+            </div>
+          </div>
+        )}
 
         {/* Tabs Section */}
         {tabs.length > 0 && (
