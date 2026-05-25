@@ -321,13 +321,22 @@ const ProductDetailPage = () => {
         </div>
 
         {/* Special Features */}
-        {specialFeatures.length > 0 && (
-          <div className="mt-10">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="mt-10">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            {specialFeatures.length > 0 ? (
               <AttributeSection title="Special Features" data={specialFeatures} />
-            </div>
+            ) : (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                  Special Features
+                </h3>
+                <p className="text-sm text-slate-500">
+                  No special features for this product is available.
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Tabs Section */}
         {tabs.length > 0 && (
