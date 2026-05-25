@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "devcdn.waltonplaza.com.bd",
       },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
     ],
   },
 };

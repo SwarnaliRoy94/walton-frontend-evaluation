@@ -210,7 +210,7 @@ export default function ProductListingPage() {
                         onClick={() => setPage(p as number)}
                         className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
                           page === p
-                            ? "bg-indigo-600 text-white shadow-sm"
+                            ? "bg-indigo-400 text-white shadow-sm"
                             : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                         }`}
                       >
