@@ -51,7 +51,7 @@ function ProductCard({ product }: Props) {
   };
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
+    <div className="group relative bg-slate-50 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
       {/* Discount Badge */}
       {discountLabel && (
         <div className="absolute top-3 left-3 z-10 bg-indigo-600 text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
@@ -78,7 +78,7 @@ function ProductCard({ product }: Props) {
               alt={product.enName}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+              className="object-contain bg-indigo-50 p-4 group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -103,14 +103,14 @@ function ProductCard({ product }: Props) {
       {/* Content */}
       <div className="p-4 flex flex-col flex-1 gap-3">
         <Link href={`/products/${product.uid}`}>
-          <h2 className="text-sm font-medium text-slate-800 line-clamp-2 leading-snug hover:text-indigo-600 transition-colors">
+          <h2 className="text-sm font-medium text-slate-800 line-clamp-2 leading-snug hover:text-indigo-800 transition-colors">
             {product.enName}
           </h2>
         </Link>
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mt-auto">
-          <span className="text-base font-semibold text-slate-900">
+          <span className="text-base font-semibold text-indigo-900">
             ৳{sellingPrice.toLocaleString()}
           </span>
           {hasDiscount && (
@@ -129,7 +129,7 @@ function ProductCard({ product }: Props) {
               ? "bg-green-50 text-green-700 border border-green-200"
               : isOutOfStock
               ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-              : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95"
+              : "bg-indigo-200 text-indigo-900 hover:bg-indigo-400 hover:text-white active:scale-95"
           }`}
         >
           {optimisticAdded
