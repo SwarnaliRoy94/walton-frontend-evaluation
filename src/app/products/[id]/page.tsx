@@ -73,6 +73,9 @@ const ProductDetailPage = () => {
   const discountLabel = getDiscountBadge(selectedVariant);
   const savingsText = getSavingsText(selectedVariant);
   const hasDiscount = discountLabel != null;
+  const discountSummary = [discountLabel, savingsText]
+    .filter((text): text is string => Boolean(text))
+    .join(" · ");
   const isOutOfStock = (selectedVariant?.quantity ?? 0) === 0;
 
   const cartItem = cartItems.find(
@@ -165,24 +168,21 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3">
+            <div className="flex items-start gap-3">
               <span className="text-3xl font-bold text-indigo-900">
                 ৳{sellingPrice.toLocaleString()}
               </span>
               {hasDiscount && (
-                <>
-                  <span className="text-lg text-slate-400 line-through">
+                <div className="ml-auto flex flex-col items-end gap-1 text-right">
+                  <span className="text-lg text-red-700 line-through">
                     ৳{mrpPrice.toLocaleString()}
                   </span>
-                  <span className="text-sm font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">
-                    {discountLabel}
-                  </span>
-                  {savingsText && (
-                    <span className="text-sm font-medium text-green-700">
-                      {savingsText}
+                  {discountSummary && (
+                    <span className="text-sm font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-200">
+                      {discountSummary}
                     </span>
                   )}
-                </>
+                </div>
               )}
             </div>
 
