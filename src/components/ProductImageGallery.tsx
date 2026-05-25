@@ -10,11 +10,11 @@ interface Props {
   discountLabel?: string | null;
 }
 
-export default function ProductImageGallery({
+const ProductImageGallery = ({
   images,
   productName,
   discountLabel,
-}: Props) {
+}: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const validImages = images.filter((img) => img.url);
@@ -146,4 +146,6 @@ export default function ProductImageGallery({
       )}
     </div>
   );
-}
+};
+
+export default ProductImageGallery;

@@ -1,56 +1,36 @@
 "use client";
 
-import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types";
-import {
-  getDiscountBadge,
-  getSavingsText,
-  getSellingPrice,
-  getVariantStock,
-  pickDisplayVariant,
-} from "@/lib/pricing";
+import { getSellingPrice, getVariantStock } from "@/lib/pricing";
+import { useProductCard } from "@/hooks/useProductCard";
 import Image from "next/image";
 import Link from "next/link";
-import { memo, useState } from "react";
+import { memo } from "react";
 
 interface Props {
   product: Product;
 }
 
 const ProductCard = ({ product }: Props) => {
-  const addItem = useCartStore((s) => s.addItem);
-  const removeItem = useCartStore((s) => s.removeItem);
-  const updateQuantity = useCartStore((s) => s.updateQuantity);
-  const cartItems = useCartStore((s) => s.items);
-
-  const variants = product.variants ?? [];
-  const defaultVariant = pickDisplayVariant(variants);
-  const [selectedVariantCode, setSelectedVariantCode] = useState<string | null>(
-    () => defaultVariant?.posItemCode ?? null
-  );
-  const variant =
-    variants.find((v) => v.posItemCode === selectedVariantCode) ??
-    defaultVariant;
-  const imageUrl = product.images?.[0]?.url;
-
-  const mrpPrice = variant?.mrpPrice ?? 0;
-  const sellingPrice = getSellingPrice(variant);
-  const discountLabel = getDiscountBadge(variant);
-  const savingsText = getSavingsText(variant);
-  const hasDiscount = discountLabel != null;
-  const maxStock = getVariantStock(variant);
-  const isOutOfStock = maxStock === 0;
-
-  const cartItem = cartItems.find(
-    (i) => i.selectedVariant.posItemCode === variant?.posItemCode
-  );
-  const cartQuantity = cartItem?.quantity ?? 0;
-  const canIncreaseQuantity = cartQuantity < maxStock;
-
-  const handleAddToCart = () => {
-    if (!variant || isOutOfStock) return;
-    addItem(product, variant);
-  };
+  const {
+    variants,
+    selectedVariant,
+    imageUrl,
+    mrpPrice,
+    sellingPrice,
+    discountLabel,
+    savingsText,
+    hasDiscount,
+    isOutOfStock,
+    cartItem,
+    cartQuantity,
+    canIncreaseQuantity,
+    onVariantSelect,
+    onAddToCart,
+    onDecreaseCartQuantity,
+    onIncreaseCartQuantity,
+    onRemoveFromCart,
+  } = useProductCard(product);
 
   return (
     <div className="group relative bg-slate-50 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
@@ -117,10 +97,10 @@ const ProductCard = ({ product }: Props) => {
               return (
                 <button
                   key={v.posItemCode}
-                  onClick={() => setSelectedVariantCode(v.posItemCode)}
+                  onClick={() => onVariantSelect(v.posItemCode)}
                   disabled={optionOutOfStock}
                   className={`px-2 py-1 text-[11px] rounded-lg border transition ${
-                    variant?.posItemCode === v.posItemCode
+                    selectedVariant?.posItemCode === v.posItemCode
                       ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                   } ${
@@ -157,14 +137,7 @@ const ProductCard = ({ product }: Props) => {
             <span className="text-left">Added to cart</span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() =>
-                  cartQuantity === 1
-                    ? removeItem(cartItem.selectedVariant.posItemCode)
-                    : updateQuantity(
-                        cartItem.selectedVariant.posItemCode,
-                        cartQuantity - 1
-                      )
-                }
+                onClick={onDecreaseCartQuantity}
                 className="qty-button"
                 aria-label="Decrease quantity"
               >
@@ -174,12 +147,7 @@ const ProductCard = ({ product }: Props) => {
                 {cartQuantity}
               </span>
               <button
-                onClick={() =>
-                  updateQuantity(
-                    cartItem.selectedVariant.posItemCode,
-                    cartQuantity + 1
-                  )
-                }
+                onClick={onIncreaseCartQuantity}
                 disabled={!canIncreaseQuantity}
                 className="qty-button-disabled"
                 aria-label="Increase quantity"
@@ -187,7 +155,7 @@ const ProductCard = ({ product }: Props) => {
                 +
               </button>
               <button
-                onClick={() => removeItem(cartItem.selectedVariant.posItemCode)}
+                onClick={onRemoveFromCart}
                 className="remove-item-button"
                 aria-label="Remove item"
               >
@@ -209,7 +177,7 @@ const ProductCard = ({ product }: Props) => {
           </div>
         ) : (
           <button
-            onClick={handleAddToCart}
+            onClick={onAddToCart}
             disabled={isOutOfStock}
             className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
               isOutOfStock

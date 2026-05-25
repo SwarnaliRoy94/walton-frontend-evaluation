@@ -1,21 +1,10 @@
 "use client";
 
 import ProductImageGallery from "@/components/ProductImageGallery";
-import { PRODUCT_DETAIL_TAB_CONFIGS } from "@/constants/productDetail";
-import { GET_PRODUCT_DETAIL } from "@/graphql/queries";
-import {
-  getDiscountBadge,
-  getSavingsText,
-  getSellingPrice,
-  getVariantStock,
-  pickDisplayVariant,
-} from "@/lib/pricing";
-import { useCartStore } from "@/store/cartStore";
-import { GetProductsResponse, ProductAttribute, ProductVariant } from "@/types";
-import { useQuery } from "@apollo/client";
+import { getSellingPrice } from "@/lib/pricing";
+import { useProductDetail } from "@/hooks/useProductDetail";
+import { ProductAttribute } from "@/types";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
 
 const AttributeSection = ({
   title,
@@ -51,63 +40,34 @@ const AttributeSection = ({
 };
 
 const ProductDetailPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const [selectedVariantCode, setSelectedVariantCode] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState(0);
-
-  const addItem = useCartStore((s) => s.addItem);
-  const removeItem = useCartStore((s) => s.removeItem);
-  const updateQuantity = useCartStore((s) => s.updateQuantity);
-  const cartItems = useCartStore((s) => s.items);
-
-  const { data, loading, error } = useQuery<GetProductsResponse>(
-    GET_PRODUCT_DETAIL,
-    {
-      variables: { filter: { uid: id } },
-    }
-  );
-
-  const product = data?.getProducts?.result?.products?.[0];
-  const statusCode = data?.getProducts?.statusCode;
-  const message = data?.getProducts?.message;
-
-  const variants = product?.variants ?? [];
-  const fallbackVariant = pickDisplayVariant(variants);
-  const selectedVariant: ProductVariant | undefined =
-    variants.find((v) => v.posItemCode === selectedVariantCode) ?? fallbackVariant;
-
-  const mrpPrice = selectedVariant?.mrpPrice ?? 0;
-  const sellingPrice = getSellingPrice(selectedVariant);
-  const discountLabel = getDiscountBadge(selectedVariant);
-  const savingsText = getSavingsText(selectedVariant);
-  const hasDiscount = discountLabel != null;
-  const discountSummary = [discountLabel, savingsText]
-    .filter((text): text is string => Boolean(text))
-    .join(" · ");
-  const maxStock = getVariantStock(selectedVariant);
-  const isOutOfStock = maxStock === 0;
-
-  const cartItem = cartItems.find(
-    (i) => i.selectedVariant.posItemCode === selectedVariant?.posItemCode
-  );
-  const cartQuantity = cartItem?.quantity ?? 0;
-  const canIncreaseQuantity = cartQuantity < maxStock;
-
-  const handleAddToCart = () => {
-    if (!product || !selectedVariant || isOutOfStock) return;
-    addItem(product, selectedVariant);
-  };
-
-  const tabs = PRODUCT_DETAIL_TAB_CONFIGS.map(({ key, label }) => ({
-    label,
-    data: product?.[key] ?? null,
-  })).filter(
-    (tab): tab is { label: string; data: ProductAttribute[] } =>
-      Array.isArray(tab.data) && tab.data.length > 0
-  );
-  const specialFeatures = product?.priceAndStocks ?? [];
-
-  const images = product?.images ?? [];
+  const {
+    loading,
+    error,
+    product,
+    statusCode,
+    message,
+    variants,
+    selectedVariant,
+    mrpPrice,
+    sellingPrice,
+    discountLabel,
+    hasDiscount,
+    discountSummary,
+    isOutOfStock,
+    cartItem,
+    cartQuantity,
+    canIncreaseQuantity,
+    tabs,
+    activeTab,
+    specialFeatures,
+    images,
+    onVariantChange,
+    onActiveTabChange,
+    onAddToCart,
+    onDecreaseCartQuantity,
+    onIncreaseCartQuantity,
+    onRemoveFromCart,
+  } = useProductDetail();
 
   // Loading
   if (loading) {
@@ -226,7 +186,7 @@ const ProductDetailPage = () => {
                   {variants.map((v) => (
                     <button
                       key={v.posItemCode}
-                      onClick={() => setSelectedVariantCode(v.posItemCode)}
+                      onClick={() => onVariantChange(v.posItemCode)}
                       className={`px-3 py-2 text-xs rounded-xl border transition ${
                         selectedVariant?.posItemCode === v.posItemCode
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
@@ -251,14 +211,7 @@ const ProductDetailPage = () => {
                   <span className="text-left">Added to cart</span>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() =>
-                        cartQuantity === 1
-                          ? removeItem(cartItem.selectedVariant.posItemCode)
-                          : updateQuantity(
-                              cartItem.selectedVariant.posItemCode,
-                              cartQuantity - 1
-                            )
-                      }
+                      onClick={onDecreaseCartQuantity}
                       className="qty-button"
                       aria-label="Decrease quantity"
                     >
@@ -268,12 +221,7 @@ const ProductDetailPage = () => {
                       {cartQuantity}
                     </span>
                     <button
-                      onClick={() =>
-                        updateQuantity(
-                          cartItem.selectedVariant.posItemCode,
-                          cartQuantity + 1
-                        )
-                      }
+                      onClick={onIncreaseCartQuantity}
                       disabled={!canIncreaseQuantity}
                       className="qty-button-disabled"
                       aria-label="Increase quantity"
@@ -281,9 +229,7 @@ const ProductDetailPage = () => {
                       +
                     </button>
                     <button
-                      onClick={() =>
-                        removeItem(cartItem.selectedVariant.posItemCode)
-                      }
+                      onClick={onRemoveFromCart}
                       className="remove-item-button"
                       aria-label="Remove item"
                     >
@@ -305,7 +251,7 @@ const ProductDetailPage = () => {
                 </div>
               ) : (
                 <button
-                  onClick={handleAddToCart}
+                  onClick={onAddToCart}
                   disabled={isOutOfStock}
                   className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     isOutOfStock
@@ -346,7 +292,7 @@ const ProductDetailPage = () => {
               {tabs.map((tab, i) => (
                 <button
                   key={i}
-                  onClick={() => setActiveTab(i)}
+                  onClick={() => onActiveTabChange(i)}
                   className={`px-5 py-2.5 text-sm font-medium rounded-t-xl transition ${
                     activeTab === i
                       ? "bg-white border border-b-white border-slate-200 text-indigo-800 -mb-px"

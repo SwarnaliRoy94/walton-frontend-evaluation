@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-export default async function Home({
+const Home = async ({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
-}) {
+}) => {
   const params = await searchParams;
   const query = new URLSearchParams();
 
@@ -22,4 +22,6 @@ export default async function Home({
 
   const queryString = query.toString();
   redirect(queryString ? `/products?${queryString}` : "/products");
-}
+};
+
+export default Home;

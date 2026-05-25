@@ -9,7 +9,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function CartDrawer({ isOpen, onClose }: Props) {
+const CartDrawer = ({ isOpen, onClose }: Props) => {
   const { items, removeItem, updateQuantity, clearCart } = useCartStore();
 
   const total = items.reduce((sum, item) => {
@@ -209,4 +209,6 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
       </div>
     </>
   );
-}
+};
+
+export default CartDrawer;
