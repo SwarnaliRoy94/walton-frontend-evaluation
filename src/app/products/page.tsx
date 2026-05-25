@@ -4,11 +4,16 @@ import { useQuery } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { GET_PRODUCTS } from "@/graphql/queries";
 import { GetProductsResponse, Product } from "@/types";
-import { getSellingPrice, pickDisplayVariant } from "@/lib/pricing";
+import {
+  getSellingPrice,
+  getVariantStock,
+  pickDisplayVariant,
+} from "@/lib/pricing";
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
 
 const LIMIT = 12;
+const EMPTY_PRODUCTS: Product[] = [];
 
 const SORT_OPTIONS = [
   { label: "Default", value: "default" },
@@ -16,10 +21,26 @@ const SORT_OPTIONS = [
   { label: "Price: High to Low", value: "price_desc" },
 ];
 
+const PRICE_FILTER_OPTIONS = [
+  { label: "All prices", value: "all" },
+  { label: "Under ৳20,000", value: "under_20000" },
+  { label: "৳20,000 - ৳50,000", value: "between_20000_50000" },
+  { label: "Above ৳50,000", value: "above_50000" },
+];
+
+const AVAILABILITY_FILTER_OPTIONS = [
+  { label: "All stock", value: "all" },
+  { label: "In stock", value: "in_stock" },
+  { label: "Out of stock", value: "out_of_stock" },
+];
+
 export default function ProductListingPage() {
   const [page, setPage] = useState<number>(0);
   const [sort, setSort] = useState<string>("default");
   const [search, setSearch] = useState<string>("");
+  const [priceFilter, setPriceFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
 
   const { data, loading, error } = useQuery<GetProductsResponse>(GET_PRODUCTS, {
     variables: {
@@ -28,7 +49,7 @@ export default function ProductListingPage() {
     },
   });
 
-  const products = data?.getProducts?.result?.products ?? [];
+  const products = data?.getProducts?.result?.products ?? EMPTY_PRODUCTS;
   const totalCount = data?.getProducts?.result?.count ?? 0;
   const totalPages = Math.ceil(totalCount / LIMIT);
 
@@ -36,6 +57,22 @@ export default function ProductListingPage() {
     const variant = pickDisplayVariant(product.variants);
     return getSellingPrice(variant);
   };
+
+  const getCategory = (product: Product): string => {
+    const categoryAttribute = (product.productAttributes ?? []).find((attr) =>
+      attr.enLabel.toLowerCase().includes("category")
+    );
+    const category = categoryAttribute?.values?.[0]?.enName?.trim();
+    return category || "Uncategorized";
+  };
+
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    products.forEach((product) => {
+      uniqueCategories.add(getCategory(product));
+    });
+    return Array.from(uniqueCategories).sort((a, b) => a.localeCompare(b));
+  }, [products]);
 
   const filteredAndSorted = useMemo(() => {
     let result = [...products];
@@ -46,6 +83,29 @@ export default function ProductListingPage() {
       );
     }
 
+    if (categoryFilter !== "all") {
+      result = result.filter((product) => getCategory(product) === categoryFilter);
+    }
+
+    if (availabilityFilter !== "all") {
+      result = result.filter((product) => {
+        const inStock = product.variants.some((variant) => getVariantStock(variant) > 0);
+        return availabilityFilter === "in_stock" ? inStock : !inStock;
+      });
+    }
+
+    if (priceFilter !== "all") {
+      result = result.filter((product) => {
+        const price = getPrice(product);
+        if (priceFilter === "under_20000") return price < 20000;
+        if (priceFilter === "between_20000_50000") {
+          return price >= 20000 && price <= 50000;
+        }
+        if (priceFilter === "above_50000") return price > 50000;
+        return true;
+      });
+    }
+
     if (sort === "price_asc") {
       result.sort((a, b) => getPrice(a) - getPrice(b));
     } else if (sort === "price_desc") {
@@ -53,7 +113,7 @@ export default function ProductListingPage() {
     }
 
     return result;
-  }, [products, sort, search]);
+  }, [products, search, categoryFilter, availabilityFilter, priceFilter, sort]);
 
   return (
     <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
@@ -71,7 +131,7 @@ export default function ProductListingPage() {
             )}
           </div>
 
-          <div className="flex gap-3 w-full sm:w-auto">
+          <div className="flex gap-3 w-full sm:w-auto flex-wrap">
             {/* Search */}
             <input
               type="text"
@@ -81,8 +141,57 @@ export default function ProductListingPage() {
                 setSearch(e.target.value);
                 setPage(0);
               }}
-              className="flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-400 bg-white/80 text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-transparent transition"
+              className="flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-transparent transition"
             />
+
+            {/* Category */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setPage(0);
+              }}
+              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+            >
+              <option value="all">All categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            {/* Price */}
+            <select
+              value={priceFilter}
+              onChange={(e) => {
+                setPriceFilter(e.target.value);
+                setPage(0);
+              }}
+              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+            >
+              {PRICE_FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            {/* Availability */}
+            <select
+              value={availabilityFilter}
+              onChange={(e) => {
+                setAvailabilityFilter(e.target.value);
+                setPage(0);
+              }}
+              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+            >
+              {AVAILABILITY_FILTER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
             {/* Sort */}
             <select
@@ -153,7 +262,7 @@ export default function ProductListingPage() {
             </div>
             <p className="text-slate-700 font-medium">No products found</p>
             <p className="text-slate-400 text-sm mt-1">
-              Try adjusting your search
+              Try adjusting your search or filters
             </p>
           </div>
         )}

@@ -13,6 +13,12 @@ export const GET_PRODUCTS = gql`
           images {
             url
           }
+          productAttributes {
+            enLabel
+            values {
+              enName
+            }
+          }
           variants {
             mrpPrice
             ebsItemCode
