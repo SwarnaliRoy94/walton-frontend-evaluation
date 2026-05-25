@@ -194,7 +194,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                 ৳{total.toLocaleString()}
               </span>
             </div>
-            <button className="w-full py-3.5 bg-indigo-400 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 active:scale-95 transition-all">
+            <button className="w-full py-3.5 bg-indigo-300 text-white text-sm font-semibold rounded-xl hover:bg-indigo-400 active:scale-95 transition-all">
               Checkout
             </button>
             <button

@@ -9,18 +9,18 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useOptimistic, useState, useTransition } from "react";
 
-function AttributeSection({
+const AttributeSection = ({
   title,
   data,
 }: {
   title: string;
   data: ProductAttribute[] | null;
-}) {
+}) => {
   if (!data || data.length === 0) return null;
   return (
     <div>
       <h3 className="text-sm font-semibold text-slate-700 mb-3">{title}</h3>
-      <div className="rounded-xl border border-slate-100 overflow-hidden">
+      <div className="rounded-xl border border-indigo-50 overflow-hidden">
         {data.map((attr, i) => (
           <div
             key={i}
@@ -40,7 +40,7 @@ function AttributeSection({
       </div>
     </div>
   );
-}
+};
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -152,12 +152,12 @@ const ProductDetailPage = () => {
         <div className="flex items-center gap-2 text-sm text-slate-400 mb-6">
           <Link
             href="/products"
-            className="hover:text-indigo-600 transition-colors"
+            className="hover:text-indigo-800 transition-colors"
           >
             Products
           </Link>
           <span>/</span>
-          <span className="text-slate-600 line-clamp-1">{product.enName}</span>
+          <span className="text-indigo-800 line-clamp-1">{product.enName}</span>
         </div>
 
         {/* Top Section */}
@@ -172,14 +172,14 @@ const ProductDetailPage = () => {
           {/* Product Info */}
           <div className="flex flex-col gap-5">
             <div>
-              <h1 className="text-xl font-semibold text-slate-900 leading-snug">
+              <h1 className="text-xl font-semibold text-slate-800 leading-snug">
                 {product.enName}
               </h1>
             </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold text-slate-900">
+              <span className="text-3xl font-bold text-indigo-900">
                 ৳{sellingPrice.toLocaleString()}
               </span>
               {hasDiscount && (
@@ -250,7 +250,7 @@ const ProductDetailPage = () => {
                     ? "bg-green-50 text-green-700 border border-green-200"
                     : isOutOfStock
                     ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95"
+                    : "bg-indigo-200 text-indigo-900 hover:bg-indigo-400 hover:text-white active:scale-95"
                 }`}
               >
                 {optimisticAdded
@@ -274,7 +274,7 @@ const ProductDetailPage = () => {
                   onClick={() => setActiveTab(i)}
                   className={`px-5 py-2.5 text-sm font-medium rounded-t-xl transition ${
                     activeTab === i
-                      ? "bg-white border border-b-white border-slate-200 text-indigo-600 -mb-px"
+                      ? "bg-white border border-b-white border-slate-200 text-indigo-800 -mb-px"
                       : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
@@ -284,7 +284,7 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6">
               <AttributeSection
                 title={tabs[activeTab].label}
                 data={tabs[activeTab].data ?? null}
