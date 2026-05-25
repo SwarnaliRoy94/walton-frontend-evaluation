@@ -2,6 +2,7 @@
 
 import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types";
+import { getDiscountBadge, getSavingsText, getSellingPrice } from "@/lib/pricing";
 import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
@@ -20,19 +21,11 @@ function ProductCard({ product }: Props) {
   const imageUrl = product.images?.[0]?.url;
 
   const mrpPrice = variant?.mrpPrice ?? 0;
-  const discount = variant?.discount;
-  const hasDiscount = discount != null && discount.amount > 0;
-  const discountType = discount?.type;
-  const discountAmount = discount?.amount ?? 0;
-  const sellingPrice = hasDiscount ? discount?.value ?? mrpPrice : mrpPrice;
+  const sellingPrice = getSellingPrice(variant);
+  const discountLabel = getDiscountBadge(variant);
+  const savingsText = getSavingsText(variant);
+  const hasDiscount = discountLabel != null;
   const isOutOfStock = (variant?.quantity ?? 0) === 0;
-
-  const discountLabel =
-    hasDiscount && discountType === "percentage"
-      ? `${discountAmount}% OFF`
-      : hasDiscount && discountType === "flat"
-      ? `৳${discountAmount} OFF`
-      : null;
 
   const cartItem = cartItems.find(
     (i) => i.selectedVariant.posItemCode === variant?.posItemCode
@@ -108,9 +101,14 @@ function ProductCard({ product }: Props) {
             ৳{sellingPrice.toLocaleString()}
           </span>
           {hasDiscount && (
-            <span className="text-xs text-slate-400 line-through">
-              ৳{mrpPrice.toLocaleString()}
-            </span>
+            <>
+              <span className="text-xs text-slate-400 line-through">
+                ৳{mrpPrice.toLocaleString()}
+              </span>
+              {savingsText && (
+                <span className="text-xs text-green-700">{savingsText}</span>
+              )}
+            </>
           )}
         </div>
 

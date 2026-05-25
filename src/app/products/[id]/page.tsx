@@ -2,6 +2,7 @@
 
 import ProductImageGallery from "@/components/ProductImageGallery";
 import { GET_PRODUCT_DETAIL } from "@/graphql/queries";
+import { getDiscountBadge, getSavingsText, getSellingPrice } from "@/lib/pricing";
 import { useCartStore } from "@/store/cartStore";
 import { GetProductsResponse, ProductAttribute, ProductVariant } from "@/types";
 import { useQuery } from "@apollo/client";
@@ -68,19 +69,11 @@ const ProductDetailPage = () => {
     variants[selectedVariantIndex];
 
   const mrpPrice = selectedVariant?.mrpPrice ?? 0;
-  const discount = selectedVariant?.discount;
-  const hasDiscount = discount != null && discount.amount > 0;
-  const sellingPrice = hasDiscount ? discount?.value ?? mrpPrice : mrpPrice;
-  const discountAmount = discount?.amount ?? 0;
-  const discountType = discount?.type;
+  const sellingPrice = getSellingPrice(selectedVariant);
+  const discountLabel = getDiscountBadge(selectedVariant);
+  const savingsText = getSavingsText(selectedVariant);
+  const hasDiscount = discountLabel != null;
   const isOutOfStock = (selectedVariant?.quantity ?? 0) === 0;
-
-  const discountLabel =
-    hasDiscount && discountType === "percentage"
-      ? `${discountAmount}% OFF`
-      : hasDiscount && discountType === "flat"
-      ? `৳${discountAmount} OFF`
-      : null;
 
   const cartItem = cartItems.find(
     (i) => i.selectedVariant.posItemCode === selectedVariant?.posItemCode
@@ -184,6 +177,11 @@ const ProductDetailPage = () => {
                   <span className="text-sm font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">
                     {discountLabel}
                   </span>
+                  {savingsText && (
+                    <span className="text-sm font-medium text-green-700">
+                      {savingsText}
+                    </span>
+                  )}
                 </>
               )}
             </div>
@@ -226,7 +224,7 @@ const ProductDetailPage = () => {
                       }`}
                       disabled={v.quantity === 0}
                     >
-                      ৳{(v.discount?.value ?? v.mrpPrice).toLocaleString()}
+                      ৳{getSellingPrice(v).toLocaleString()}
                       {v.quantity === 0 && " (Out of stock)"}
                     </button>
                   ))}

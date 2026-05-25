@@ -4,6 +4,7 @@ import { useQuery } from "@apollo/client";
 import { useState, useMemo } from "react";
 import { GET_PRODUCTS } from "@/graphql/queries";
 import { GetProductsResponse, Product } from "@/types";
+import { getSellingPrice } from "@/lib/pricing";
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
 
@@ -33,8 +34,7 @@ export default function ProductListingPage() {
 
   const getPrice = (product: Product): number => {
     const variant = product.variants?.[0];
-    if (!variant) return 0;
-    return variant.discount?.value ?? variant.mrpPrice;
+    return getSellingPrice(variant);
   };
 
   const filteredAndSorted = useMemo(() => {

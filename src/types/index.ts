@@ -14,7 +14,7 @@ export interface ProductAttribute {
 export interface Discount {
   amount: number;
   value: number;
-  type: "flat" | "percentage";
+  type: string;
 }
 
 export interface ProductVariant {
