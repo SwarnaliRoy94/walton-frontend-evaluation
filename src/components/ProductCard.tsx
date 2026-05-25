@@ -6,6 +6,8 @@ import {
   getDiscountBadge,
   getSavingsText,
   getSellingPrice,
+  getVariantStock,
+  pickDisplayVariant,
 } from "@/lib/pricing";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,7 +23,7 @@ const ProductCard = ({ product }: Props) => {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const cartItems = useCartStore((s) => s.items);
 
-  const variant = product.variants?.[0];
+  const variant = pickDisplayVariant(product.variants);
   const imageUrl = product.images?.[0]?.url;
 
   const mrpPrice = variant?.mrpPrice ?? 0;
@@ -29,12 +31,14 @@ const ProductCard = ({ product }: Props) => {
   const discountLabel = getDiscountBadge(variant);
   const savingsText = getSavingsText(variant);
   const hasDiscount = discountLabel != null;
-  const isOutOfStock = (variant?.quantity ?? 0) === 0;
+  const maxStock = getVariantStock(variant);
+  const isOutOfStock = maxStock === 0;
 
   const cartItem = cartItems.find(
     (i) => i.selectedVariant.posItemCode === variant?.posItemCode
   );
   const cartQuantity = cartItem?.quantity ?? 0;
+  const canIncreaseQuantity = cartQuantity < maxStock;
 
   const handleAddToCart = () => {
     if (!variant || isOutOfStock) return;
@@ -145,7 +149,8 @@ const ProductCard = ({ product }: Props) => {
                     cartQuantity + 1
                   )
                 }
-                className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                disabled={!canIncreaseQuantity}
+                className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white"
                 aria-label="Increase quantity"
               >
                 +

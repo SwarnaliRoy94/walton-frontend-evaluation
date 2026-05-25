@@ -1,6 +1,6 @@
 "use client";
 
-import { getSellingPrice } from "@/lib/pricing";
+import { getSellingPrice, getVariantStock } from "@/lib/pricing";
 import { useCartStore } from "@/store/cartStore";
 import Image from "next/image";
 
@@ -92,6 +92,8 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
           <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
             {items.map((item) => {
               const price = getSellingPrice(item.selectedVariant);
+              const maxStock = getVariantStock(item.selectedVariant);
+              const canIncreaseQuantity = item.quantity < maxStock;
               const imageUrl = item.product.images?.[0]?.url;
 
               return (
@@ -148,7 +150,8 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                             item.quantity + 1
                           )
                         }
-                        className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                        disabled={!canIncreaseQuantity}
+                        className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white"
                       >
                         +
                       </button>

@@ -15,6 +15,19 @@ const getDiscountType = (type: string | null | undefined): string => {
   return String(type ?? "").trim().toLowerCase();
 };
 
+export const getVariantStock = (
+  variant?: ProductVariant | null
+): number => {
+  return Math.max(0, toNumber(variant?.quantity));
+};
+
+export const pickDisplayVariant = (
+  variants?: ProductVariant[] | null
+): ProductVariant | undefined => {
+  if (!variants || variants.length === 0) return undefined;
+  return variants.find((variant) => getVariantStock(variant) > 0) ?? variants[0];
+};
+
 const formatPercent = (value: number): string => {
   if (!Number.isFinite(value) || value <= 0) return "0";
   if (Number.isInteger(value)) return String(value);

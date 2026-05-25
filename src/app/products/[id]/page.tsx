@@ -2,7 +2,13 @@
 
 import ProductImageGallery from "@/components/ProductImageGallery";
 import { GET_PRODUCT_DETAIL } from "@/graphql/queries";
-import { getDiscountBadge, getSavingsText, getSellingPrice } from "@/lib/pricing";
+import {
+  getDiscountBadge,
+  getSavingsText,
+  getSellingPrice,
+  getVariantStock,
+  pickDisplayVariant,
+} from "@/lib/pricing";
 import { useCartStore } from "@/store/cartStore";
 import { GetProductsResponse, ProductAttribute, ProductVariant } from "@/types";
 import { useQuery } from "@apollo/client";
@@ -45,7 +51,7 @@ const AttributeSection = ({
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [selectedVariantCode, setSelectedVariantCode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
 
   const addItem = useCartStore((s) => s.addItem);
@@ -65,8 +71,9 @@ const ProductDetailPage = () => {
   const message = data?.getProducts?.message;
 
   const variants = product?.variants ?? [];
+  const fallbackVariant = pickDisplayVariant(variants);
   const selectedVariant: ProductVariant | undefined =
-    variants[selectedVariantIndex];
+    variants.find((v) => v.posItemCode === selectedVariantCode) ?? fallbackVariant;
 
   const mrpPrice = selectedVariant?.mrpPrice ?? 0;
   const sellingPrice = getSellingPrice(selectedVariant);
@@ -76,12 +83,14 @@ const ProductDetailPage = () => {
   const discountSummary = [discountLabel, savingsText]
     .filter((text): text is string => Boolean(text))
     .join(" · ");
-  const isOutOfStock = (selectedVariant?.quantity ?? 0) === 0;
+  const maxStock = getVariantStock(selectedVariant);
+  const isOutOfStock = maxStock === 0;
 
   const cartItem = cartItems.find(
     (i) => i.selectedVariant.posItemCode === selectedVariant?.posItemCode
   );
   const cartQuantity = cartItem?.quantity ?? 0;
+  const canIncreaseQuantity = cartQuantity < maxStock;
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant || isOutOfStock) return;
@@ -211,12 +220,12 @@ const ProductDetailPage = () => {
                   Select Variant
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {variants.map((v, i) => (
+                  {variants.map((v) => (
                     <button
                       key={v.posItemCode}
-                      onClick={() => setSelectedVariantIndex(i)}
+                      onClick={() => setSelectedVariantCode(v.posItemCode)}
                       className={`px-3 py-2 text-xs rounded-xl border transition ${
-                        selectedVariantIndex === i
+                        selectedVariant?.posItemCode === v.posItemCode
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
                           : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
                       } ${
@@ -262,7 +271,8 @@ const ProductDetailPage = () => {
                           cartQuantity + 1
                         )
                       }
-                      className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                      disabled={!canIncreaseQuantity}
+                      className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white"
                       aria-label="Increase quantity"
                     >
                       +
