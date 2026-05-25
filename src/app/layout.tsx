@@ -5,6 +5,7 @@ import ApolloWrapper from "@/lib/apolloWrapper";
 import CartDrawer from "@/components/Cart/CartDrawer";
 import { useCartStore } from "@/store/cartStore";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 function Header() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -58,6 +59,7 @@ export default function RootLayout({
         <ApolloWrapper>
           <Header />
           {children}
+          <Footer />
         </ApolloWrapper>
       </body>
     </html>
