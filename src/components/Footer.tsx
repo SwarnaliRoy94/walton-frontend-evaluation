@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FOOTER_QUICK_LINKS, FOOTER_SUPPORT_LINES } from "@/constants/footer";
 
 const Footer = () => {
   return (
@@ -20,20 +21,20 @@ const Footer = () => {
               Quick Links
             </h4>
             <ul className="flex flex-col gap-1.5">
-              <li>
-                <Link
-                  href="/products"
-                  className="text-sm text-indigo-900 hover:text-indigo-900 transition"
-                >
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <span className="text-sm text-indigo-900">About Walton</span>
-              </li>
-              <li>
-                <span className="text-sm text-indigo-900">Contact Us</span>
-              </li>
+              {FOOTER_QUICK_LINKS.map((item) => (
+                <li key={item.label}>
+                  {item.href ? (
+                    <Link
+                      href={item.href}
+                      className="text-sm text-indigo-900 hover:text-indigo-900 transition"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span className="text-sm text-indigo-900">{item.label}</span>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -43,15 +44,11 @@ const Footer = () => {
               Customer Service Helpline
             </h4>
             <ul className="flex flex-col gap-1.5">
-              <li className="text-sm text-indigo-900">
-                Call us at 16267 (Charge Applicable)
-              </li>
-              <li className="text-sm text-indigo-900">
-                or 08 000016267 (Toll Free)
-              </li>
-              <li className="text-sm text-indigo-900">
-                We are available from 7:00 AM to 11:00 PM
-              </li>
+              {FOOTER_SUPPORT_LINES.map((line) => (
+                <li key={line} className="text-sm text-indigo-900">
+                  {line}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

@@ -9,7 +9,7 @@ const Header = () => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-30 bg-indigo-50 backdrop-blur-sm border-b border-slate-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="listing-container py-3 flex items-center justify-between">
           <span className="text-2xl font-semibold text-indigo-900">
             Walton Plaza
           </span>

@@ -136,11 +136,11 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                                 item.quantity - 1
                               )
                         }
-                        className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium"
+                        className="qty-button"
                       >
                         −
                       </button>
-                      <span className="text-sm font-medium text-slate-700 w-5 text-center">
+                      <span className="qty-count">
                         {item.quantity}
                       </span>
                       <button
@@ -151,7 +151,7 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                           )
                         }
                         disabled={!canIncreaseQuantity}
-                        className="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white"
+                        className="qty-button-disabled"
                       >
                         +
                       </button>
@@ -161,11 +161,11 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
                         onClick={() =>
                           removeItem(item.selectedVariant.posItemCode)
                         }
-                        className="ml-auto text-slate-300 hover:text-red-400 transition"
+                        className="ml-auto remove-item-button"
                         aria-label="Remove item"
                       >
                         <svg
-                          className="w-4 h-4"
+                          className="small-icon"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

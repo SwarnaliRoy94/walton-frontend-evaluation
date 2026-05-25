@@ -5,6 +5,17 @@ import { useMemo, useState } from "react";
 import { GET_PRODUCTS } from "@/graphql/queries";
 import { GetProductsResponse, Product } from "@/types";
 import {
+  ALL_FILTER_VALUE,
+  AVAILABILITY_FILTER_OPTIONS,
+  AvailabilityFilterValue,
+  DEFAULT_SORT_VALUE,
+  PRICE_FILTER_OPTIONS,
+  PRODUCTS_PER_PAGE,
+  PriceFilterValue,
+  SORT_OPTIONS,
+  SortValue,
+} from "@/constants/productListing";
+import {
   getSellingPrice,
   getVariantStock,
   pickDisplayVariant,
@@ -12,48 +23,27 @@ import {
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
 
-const LIMIT = 12;
 const EMPTY_PRODUCTS: Product[] = [];
-
-const SORT_OPTIONS = [
-  { label: "Default", value: "default" },
-  { label: "Price: Low to High", value: "price_asc" },
-  { label: "Price: High to Low", value: "price_desc" },
-  { label: "Rating: High to Low", value: "rating_desc" },
-  { label: "Rating: Low to High", value: "rating_asc" },
-];
-
-const PRICE_FILTER_OPTIONS = [
-  { label: "All prices", value: "all" },
-  { label: "Under ৳20,000", value: "under_20000" },
-  { label: "৳20,000 - ৳50,000", value: "between_20000_50000" },
-  { label: "Above ৳50,000", value: "above_50000" },
-];
-
-const AVAILABILITY_FILTER_OPTIONS = [
-  { label: "All stock", value: "all" },
-  { label: "In stock", value: "in_stock" },
-  { label: "Out of stock", value: "out_of_stock" },
-];
 
 export default function ProductListingPage() {
   const [page, setPage] = useState<number>(0);
-  const [sort, setSort] = useState<string>("default");
+  const [sort, setSort] = useState<SortValue>(DEFAULT_SORT_VALUE);
   const [search, setSearch] = useState<string>("");
-  const [priceFilter, setPriceFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
+  const [priceFilter, setPriceFilter] = useState<PriceFilterValue>(ALL_FILTER_VALUE);
+  const [categoryFilter, setCategoryFilter] = useState<string>(ALL_FILTER_VALUE);
+  const [availabilityFilter, setAvailabilityFilter] =
+    useState<AvailabilityFilterValue>(ALL_FILTER_VALUE);
 
   const { data, loading, error } = useQuery<GetProductsResponse>(GET_PRODUCTS, {
     variables: {
-      pagination: { skip: page * LIMIT, limit: LIMIT },
+      pagination: { skip: page * PRODUCTS_PER_PAGE, limit: PRODUCTS_PER_PAGE },
       filter: { isActive: null },
     },
   });
 
   const products = data?.getProducts?.result?.products ?? EMPTY_PRODUCTS;
   const totalCount = data?.getProducts?.result?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / LIMIT);
+  const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
 
   const getPrice = (product: Product): number => {
     const variant = pickDisplayVariant(product.variants);
@@ -90,18 +80,18 @@ export default function ProductListingPage() {
       );
     }
 
-    if (categoryFilter !== "all") {
+    if (categoryFilter !== ALL_FILTER_VALUE) {
       result = result.filter((product) => getCategory(product) === categoryFilter);
     }
 
-    if (availabilityFilter !== "all") {
+    if (availabilityFilter !== ALL_FILTER_VALUE) {
       result = result.filter((product) => {
         const inStock = product.variants.some((variant) => getVariantStock(variant) > 0);
         return availabilityFilter === "in_stock" ? inStock : !inStock;
       });
     }
 
-    if (priceFilter !== "all") {
+    if (priceFilter !== ALL_FILTER_VALUE) {
       result = result.filter((product) => {
         const price = getPrice(product);
         if (priceFilter === "under_20000") return price < 20000;
@@ -135,10 +125,10 @@ export default function ProductListingPage() {
   }, [products, search, categoryFilter, availabilityFilter, priceFilter, sort]);
 
   return (
-    <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
+    <main className="page-shell">
       {/* Header */}
       <div className="bg-white/100 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="listing-container py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold text-indigo-900 tracking-tight">
               Products
@@ -160,7 +150,7 @@ export default function ProductListingPage() {
                 setSearch(e.target.value);
                 setPage(0);
               }}
-              className="flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-transparent transition"
+              className="search-input"
             />
 
             {/* Category */}
@@ -170,9 +160,9 @@ export default function ProductListingPage() {
                 setCategoryFilter(e.target.value);
                 setPage(0);
               }}
-              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+              className="filter-select"
             >
-              <option value="all">All categories</option>
+              <option value={ALL_FILTER_VALUE}>All categories</option>
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -184,10 +174,10 @@ export default function ProductListingPage() {
             <select
               value={priceFilter}
               onChange={(e) => {
-                setPriceFilter(e.target.value);
+                setPriceFilter(e.target.value as PriceFilterValue);
                 setPage(0);
               }}
-              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+              className="filter-select"
             >
               {PRICE_FILTER_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -200,10 +190,10 @@ export default function ProductListingPage() {
             <select
               value={availabilityFilter}
               onChange={(e) => {
-                setAvailabilityFilter(e.target.value);
+                setAvailabilityFilter(e.target.value as AvailabilityFilterValue);
                 setPage(0);
               }}
-              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+              className="filter-select"
             >
               {AVAILABILITY_FILTER_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -215,8 +205,8 @@ export default function ProductListingPage() {
             {/* Sort */}
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+              onChange={(e) => setSort(e.target.value as SortValue)}
+              className="filter-select"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -228,7 +218,7 @@ export default function ProductListingPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="listing-container py-8">
         {/* Error */}
         {error && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -253,9 +243,9 @@ export default function ProductListingPage() {
         )}
 
         {/* Skeleton */}
-        {loading && (
+            {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {Array.from({ length: LIMIT }).map((_, i) => (
+            {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
               <ProductSkeleton key={i} />
             ))}
           </div>
@@ -301,7 +291,7 @@ export default function ProductListingPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="pagination-button"
                 >
                   Previous
                 </button>
@@ -353,7 +343,7 @@ export default function ProductListingPage() {
                     setPage((p) => Math.min(totalPages - 1, p + 1))
                   }
                   disabled={page === totalPages - 1}
-                  className="px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  className="pagination-button"
                 >
                   Next
                 </button>
