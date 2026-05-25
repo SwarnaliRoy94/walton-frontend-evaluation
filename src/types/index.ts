@@ -25,6 +25,10 @@ export interface ProductVariant {
   discount: Discount | null;
 }
 
+export interface ProductRating {
+  average: number | null;
+}
+
 export interface Product {
   uid: string;
   enName: string;
@@ -34,6 +38,7 @@ export interface Product {
   deliveries: ProductAttribute[] | null;
   serviceAndDeliveries: ProductAttribute[] | null;
   priceAndStocks: ProductAttribute[] | null;
+  rating?: ProductRating | null;
   variants: ProductVariant[];
 }
 

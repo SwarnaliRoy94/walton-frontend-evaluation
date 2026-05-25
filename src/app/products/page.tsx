@@ -19,6 +19,8 @@ const SORT_OPTIONS = [
   { label: "Default", value: "default" },
   { label: "Price: Low to High", value: "price_asc" },
   { label: "Price: High to Low", value: "price_desc" },
+  { label: "Rating: High to Low", value: "rating_desc" },
+  { label: "Rating: Low to High", value: "rating_asc" },
 ];
 
 const PRICE_FILTER_OPTIONS = [
@@ -56,6 +58,11 @@ export default function ProductListingPage() {
   const getPrice = (product: Product): number => {
     const variant = pickDisplayVariant(product.variants);
     return getSellingPrice(variant);
+  };
+
+  const getRating = (product: Product): number | null => {
+    const rating = product.rating?.average;
+    return typeof rating === "number" && Number.isFinite(rating) ? rating : null;
   };
 
   const getCategory = (product: Product): string => {
@@ -110,6 +117,18 @@ export default function ProductListingPage() {
       result.sort((a, b) => getPrice(a) - getPrice(b));
     } else if (sort === "price_desc") {
       result.sort((a, b) => getPrice(b) - getPrice(a));
+    } else if (sort === "rating_desc" || sort === "rating_asc") {
+      const isDesc = sort === "rating_desc";
+      result.sort((a, b) => {
+        const ratingA = getRating(a);
+        const ratingB = getRating(b);
+
+        if (ratingA == null && ratingB == null) return 0;
+        if (ratingA == null) return 1;
+        if (ratingB == null) return -1;
+
+        return isDesc ? ratingB - ratingA : ratingA - ratingB;
+      });
     }
 
     return result;

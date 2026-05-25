@@ -19,6 +19,9 @@ export const GET_PRODUCTS = gql`
               enName
             }
           }
+          rating {
+            average
+          }
           variants {
             mrpPrice
             ebsItemCode
