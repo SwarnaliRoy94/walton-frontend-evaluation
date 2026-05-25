@@ -16,9 +16,9 @@ const SORT_OPTIONS = [
 ];
 
 export default function ProductListingPage() {
-  const [page, setPage] = useState(0);
-  const [sort, setSort] = useState("default");
-  const [search, setSearch] = useState("");
+  const [page, setPage] = useState<number>(0);
+  const [sort, setSort] = useState<string>("default");
+  const [search, setSearch] = useState<string>("");
 
   const { data, loading, error } = useQuery<GetProductsResponse>(GET_PRODUCTS, {
     variables: {
@@ -56,12 +56,12 @@ export default function ProductListingPage() {
   }, [products, sort, search]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
       {/* Header */}
       <div className="bg-white/100 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-slate-800 tracking-tight">
+            <h1 className="text-xl font-semibold text-indigo-900 tracking-tight">
               Products
             </h1>
             {!loading && (
@@ -81,14 +81,14 @@ export default function ProductListingPage() {
                 setSearch(e.target.value);
                 setPage(0);
               }}
-              className="flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition"
+              className="flex-1 sm:w-64 px-4 py-2 text-sm rounded-xl border border-slate-400 bg-white/80 text-slate-700 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-transparent transition"
             />
 
             {/* Sort */}
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
+              className="px-3 py-2 text-sm rounded-xl border border-slate-200 bg-white/80 text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>

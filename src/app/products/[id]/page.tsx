@@ -110,7 +110,7 @@ const ProductDetailPage = () => {
   // Loading
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="aspect-square bg-white rounded-2xl" />
@@ -129,7 +129,7 @@ const ProductDetailPage = () => {
   // Error
   if (error || statusCode !== 200 || !product) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-700 font-medium">
             {message ?? "Product not found"}
@@ -146,7 +146,7 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <main className="min-h-screen bg-linear-to-r from-slate-50 via-teal-50 to-slate-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-400 mb-6">

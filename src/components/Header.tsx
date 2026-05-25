@@ -8,19 +8,19 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-30 bg-indigo-200 backdrop-blur-sm border-b border-slate-200/60">
+      <header className="fixed top-0 left-0 right-0 z-30 bg-indigo-50 backdrop-blur-sm border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-          <span className="text-2xl font-semibold text-slate-800">
+          <span className="text-2xl font-semibold text-indigo-900">
             Walton Plaza
           </span>
           <button
             onClick={() => setCartOpen(true)}
-            className="relative w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-100 transition"
+            className="relative w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 hover:bg-indigo-100 transition"
           >
             <svg
               className="w-5 h-5"
               fill="none"
-              stroke="currentColor"
+              stroke='indigo'
               viewBox="0 0 24 24"
             >
               <path
