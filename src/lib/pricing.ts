@@ -15,6 +15,31 @@ const getDiscountType = (type: string | null | undefined): string => {
   return String(type ?? "").trim().toLowerCase();
 };
 
+const formatPercent = (value: number): string => {
+  if (!Number.isFinite(value) || value <= 0) return "0";
+  if (Number.isInteger(value)) return String(value);
+  return value.toFixed(1).replace(/\.0$/, "");
+};
+
+const getSavingsAmount = (
+  variant?: ProductVariant | null
+): number => {
+  if (!variant) return 0;
+  const mrpPrice = toNumber(variant.mrpPrice);
+  const sellingPrice = getSellingPrice(variant);
+  return Math.max(0, mrpPrice - sellingPrice);
+};
+
+const getDiscountPercent = (
+  variant?: ProductVariant | null
+): number => {
+  if (!variant) return 0;
+  const mrpPrice = toNumber(variant.mrpPrice);
+  if (mrpPrice <= 0) return 0;
+  const savings = getSavingsAmount(variant);
+  return (savings / mrpPrice) * 100;
+};
+
 export const getSellingPrice = (
   variant?: ProductVariant | null
 ): number => {
@@ -47,41 +72,15 @@ export const getSellingPrice = (
 export const getDiscountBadge = (
   variant?: ProductVariant | null
 ): string | null => {
-  const discount = variant?.discount;
-  if (!discount) return null;
-
-  const amount = toNumber(discount.amount);
-  const discountType = getDiscountType(discount.type);
-  if (amount <= 0) return null;
-
-  if (discountType === "percentage") {
-    return `${amount}% OFF`;
-  }
-
-  if (discountType === "flat") {
-    return `৳${amount.toLocaleString()} OFF`;
-  }
-
-  return null;
+  const percent = getDiscountPercent(variant);
+  if (percent <= 0) return null;
+  return `${formatPercent(percent)}% OFF`;
 };
 
 export const getSavingsText = (
   variant?: ProductVariant | null
 ): string | null => {
-  const discount = variant?.discount;
-  if (!discount) return null;
-
-  const amount = toNumber(discount.amount);
-  const discountType = getDiscountType(discount.type);
-  if (amount <= 0) return null;
-
-  if (discountType === "percentage") {
-    return `Save ${amount}%`;
-  }
-
-  if (discountType === "flat") {
-    return `Save ৳${amount.toLocaleString()}`;
-  }
-
-  return null;
+  const savings = getSavingsAmount(variant);
+  if (savings <= 0) return null;
+  return `Save ৳${Math.round(savings).toLocaleString()}`;
 };

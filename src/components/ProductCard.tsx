@@ -2,7 +2,11 @@
 
 import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/types";
-import { getDiscountBadge, getSavingsText, getSellingPrice } from "@/lib/pricing";
+import {
+  getDiscountBadge,
+  getSavingsText,
+  getSellingPrice,
+} from "@/lib/pricing";
 import Image from "next/image";
 import Link from "next/link";
 import { memo } from "react";
@@ -11,7 +15,7 @@ interface Props {
   product: Product;
 }
 
-function ProductCard({ product }: Props) {
+const ProductCard = ({ product }: Props) => {
   const addItem = useCartStore((s) => s.addItem);
   const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
@@ -41,7 +45,7 @@ function ProductCard({ product }: Props) {
     <div className="group relative bg-slate-50 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
       {/* Discount Badge */}
       {discountLabel && (
-        <div className="absolute top-3 left-3 z-10 bg-indigo-600 text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+        <div className="absolute -left-9 top-4 z-10 w-28 -rotate-45 bg-green-50 text-green-700 border border-red-400 text-[10px] font-semibold tracking-wide text-center py-1 shadow-sm">
           {discountLabel}
         </div>
       )}
@@ -102,7 +106,7 @@ function ProductCard({ product }: Props) {
           </span>
           {hasDiscount && (
             <>
-              <span className="text-xs text-slate-400 line-through">
+              <span className="text-sm text-red-400 line-through">
                 ৳{mrpPrice.toLocaleString()}
               </span>
               {savingsText && (
@@ -183,6 +187,6 @@ function ProductCard({ product }: Props) {
       </div>
     </div>
   );
-}
+};
 
 export default memo(ProductCard);
