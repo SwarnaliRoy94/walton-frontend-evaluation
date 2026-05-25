@@ -45,7 +45,7 @@ const ProductCard = ({ product }: Props) => {
     <div className="group relative bg-slate-50 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
       {/* Discount Badge */}
       {discountLabel && (
-        <div className="absolute -left-9 top-4 z-10 w-28 -rotate-45 bg-green-50 text-green-700 border border-red-400 text-[10px] font-semibold tracking-wide text-center py-1 shadow-sm">
+        <div className="discount-ribbon top-4">
           {discountLabel}
         </div>
       )}
@@ -100,19 +100,19 @@ const ProductCard = ({ product }: Props) => {
         </Link>
 
         {/* Price */}
-        <div className="flex items-baseline gap-2 mt-auto">
+        <div className="flex items-start mt-auto">
           <span className="text-base font-semibold text-indigo-900">
             ৳{sellingPrice.toLocaleString()}
           </span>
           {hasDiscount && (
-            <>
-              <span className="text-sm text-red-400 line-through">
+            <div className="ml-auto flex flex-col items-end text-right leading-tight">
+              <span className="text-sm text-red-700 line-through">
                 ৳{mrpPrice.toLocaleString()}
               </span>
               {savingsText && (
                 <span className="text-xs text-green-700">{savingsText}</span>
               )}
-            </>
+            </div>
           )}
         </div>
 

@@ -62,7 +62,7 @@ export default function ProductImageGallery({
 
         {/* Discount badge */}
         {discountLabel && (
-          <div className="absolute -left-9 top-5 z-10 w-28 -rotate-45 bg-green-50 text-green-700 border border-red-400 text-[10px] font-semibold tracking-wide text-center py-1 shadow-sm">
+          <div className="discount-ribbon top-5">
             {discountLabel}
           </div>
         )}
