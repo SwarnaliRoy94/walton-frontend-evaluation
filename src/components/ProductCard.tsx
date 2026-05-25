@@ -9,9 +9,10 @@ import { memo } from "react";
 
 interface Props {
   product: Product;
+  imageLoading?: "lazy" | "eager";
 }
 
-const ProductCard = ({ product }: Props) => {
+const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
   const {
     variants,
     selectedVariant,
@@ -60,6 +61,7 @@ const ProductCard = ({ product }: Props) => {
               alt={product.enName}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              loading={imageLoading}
               className="object-contain bg-indigo-50 p-4 group-hover:scale-105 transition-transform duration-500"
             />
           ) : (

@@ -57,7 +57,7 @@ const ProductImageGallery = ({
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain p-6 transition-opacity duration-300"
-          priority
+          loading="eager"
         />
 
         {/* Discount badge */}

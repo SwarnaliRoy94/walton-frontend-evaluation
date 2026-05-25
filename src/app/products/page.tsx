@@ -185,8 +185,12 @@ const ProductListingPage = () => {
         {!loading && !error && filteredAndSorted.length > 0 && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {filteredAndSorted.map((product) => (
-                <ProductCard key={product.uid} product={product} />
+              {filteredAndSorted.map((product, index) => (
+                <ProductCard
+                  key={product.uid}
+                  product={product}
+                  imageLoading={index < 4 ? "eager" : "lazy"}
+                />
               ))}
             </div>
 
