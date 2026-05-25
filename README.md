@@ -103,7 +103,7 @@ npm install
 2. Create `.env.local`:
 
 ```bash
-NEXT_PUBLIC_GRAPHQL_URL=https://devapi.waltonplaza.com.bd/graphql
+NEXT_PUBLIC_GRAPHQL_URL=url
 ```
 
 3. Start development server:
