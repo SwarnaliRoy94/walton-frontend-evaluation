@@ -28,6 +28,9 @@ A Next.js 16 + GraphQL frontend implementation for Walton Plaza product listing 
 - React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
 - Sanitized rich-text rendering for PDP attribute content to avoid XSS while preserving basic formatting.
 - PLP API `statusCode`/`message` handling (business-level error state in addition to transport errors).
+- Explicit Server/Client boundary with Server route/layout entries.
+- `app/layout.tsx` and route files are Server Components.
+- Interactive UI (`Header`, Apollo context consumers, PLP/PDP UI blocks) are isolated Client Components.
 
 ## Pricing and Variant Logic
 
@@ -78,6 +81,9 @@ src/
     products/page.tsx           # Product listing UI
     products/[id]/page.tsx      # Product detail UI
   components/
+    pages/
+      ProductListingClient.tsx
+      ProductDetailClient.tsx
     ProductCard.tsx
     ProductImageGallery.tsx
     Header.tsx
