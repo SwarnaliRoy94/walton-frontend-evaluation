@@ -26,6 +26,8 @@ A Next.js 16 + GraphQL frontend implementation for Walton Plaza product listing 
 - Persisted cart state via localStorage (`walton-cart`).
 - Above-the-fold image loading optimizations for better LCP behavior.
 - React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
+- Sanitized rich-text rendering for PDP attribute content to avoid XSS while preserving basic formatting.
+- PLP API `statusCode`/`message` handling (business-level error state in addition to transport errors).
 
 ## Pricing and Variant Logic
 
@@ -130,3 +132,10 @@ http://localhost:3000
 
 - This codebase intentionally prioritizes correctness and stability against current API behavior.
 - Some UI behaviors (search scope, pagination strategy) are constrained.
+
+## Security & Error Handling Notes
+
+- The API can return HTML-formatted strings for product attribute values (`<p>`, `<br>`, lists, etc.).
+- To keep formatting without exposing the app to script injection, HTML is sanitized with `dompurify` and then parsed into React nodes with `html-react-parser`.
+- This is safer than rendering raw HTML directly, and avoids showing literal tags in the UI.
+- On the PLP, both GraphQL transport errors and business response errors (`statusCode !== 200`) are handled with user-visible error messaging.
