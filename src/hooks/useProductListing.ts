@@ -23,6 +23,25 @@ const EMPTY_PRODUCTS: Product[] = [];
 const API_PAGE_LIMIT = 30;
 const SEARCH_DEBOUNCE_MS = 300;
 
+const dedupeProductsByUid = (products: Product[]): Product[] => {
+  const seenUids = new Set<string>();
+  const deduped: Product[] = [];
+
+  for (const product of products) {
+    const uid = product.uid?.trim();
+    if (!uid) {
+      deduped.push(product);
+      continue;
+    }
+    if (seenUids.has(uid)) continue;
+
+    seenUids.add(uid);
+    deduped.push(product);
+  }
+
+  return deduped;
+};
+
 const getPaginationItems = (
   page: number,
   totalPages: number
@@ -135,7 +154,7 @@ export const useProductListing = () => {
         }
 
         if (!ignoreResponse) {
-          setAllProducts(aggregatedProducts);
+          setAllProducts(dedupeProductsByUid(aggregatedProducts));
         }
       } catch (caughtError) {
         if (!ignoreResponse) {
