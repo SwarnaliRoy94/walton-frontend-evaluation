@@ -33,7 +33,7 @@ const Header = () => {
           </div>
           <div className="ml-auto flex items-center gap-2">
             {isProductsRoute && (
-              <div className="hidden md:block w-[360px]">
+              <div className="w-[34vw] min-w-[120px] max-w-[360px] md:w-[360px]">
                 <input
                   type="text"
                   placeholder="Search products..."

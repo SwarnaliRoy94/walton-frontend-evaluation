@@ -68,7 +68,7 @@ const ProductListingPage = () => {
         <div className="relative overflow-hidden bg-linear-to-r from-transparent via-[#faf7ff]/85 to-transparent">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 hidden lg:block"
+            className="pointer-events-none absolute inset-0"
           >
             <div className="absolute inset-y-0 right-0 w-[100%] overflow-hidden">
               <Image
@@ -76,9 +76,9 @@ const ProductListingPage = () => {
                 alt=""
                 fill
                 sizes="52vw"
-                className="object-cover object-center opacity-22 blur-[1px] scale-108"
+                className="object-cover object-center opacity-16 sm:opacity-18 lg:opacity-22 blur-[1px] scale-108"
               />
-              <div className="absolute inset-0 bg-linear-to-l from-white/15 via-[#faf7ff]/72 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-l from-white/30 via-[#faf7ff]/86 to-[#faf7ff]/35 lg:from-white/15 lg:via-[#faf7ff]/72 lg:to-transparent" />
             </div>
             {/* <div className="absolute right-2 top-5 h-44 w-44 overflow-hidden rounded-full border border-white/55 shadow-[0_20px_36px_-22px_rgba(15,23,42,0.5)]">
               <Image
@@ -105,7 +105,7 @@ const ProductListingPage = () => {
                   for performance, comfort, and everyday convenience.
                 </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-flow-col auto-cols-[minmax(210px,1fr)] gap-2 overflow-x-auto py-1 sm:grid-cols-2 sm:grid-flow-row sm:auto-cols-auto sm:overflow-visible sm:gap-3 sm:pt-1">
                 {[
                   {
                     title: "Smart Entertainment",
@@ -126,30 +126,30 @@ const ProductListingPage = () => {
                 ].map((item, index) => (
                   <article
                     key={item.title}
-                    className="feature-card-animate rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3 shadow-[0_10px_20px_-22px_rgba(15,23,42,0.45)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)]"
+                    className="feature-card-animate min-w-0 shrink-0 rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-2.5 shadow-[0_10px_20px_-22px_rgba(15,23,42,0.45)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)] sm:py-3"
                     style={{ animationDelay: `${120 + index * 90}ms` }}
                   >
                     <h3 className="text-sm font-semibold text-slate-800">
                       {item.title}
                     </h3>
-                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                    <p className="hidden sm:block mt-1 text-xs text-slate-500 leading-relaxed">
                       {item.subtitle}
                     </p>
                   </article>
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 self-center lg:pl-4 lg:border-l lg:border-slate-200/60">
+            <div className="grid grid-flow-col auto-cols-[minmax(180px,1fr)] gap-2 overflow-x-auto py-1 lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-1 lg:gap-3 lg:overflow-visible lg:py-0 lg:self-center lg:pl-4 lg:border-l lg:border-slate-200/60">
               {SERVICE_HIGHLIGHTS.map((item, index) => (
                 <div
                   key={item.title}
-                  className="service-card-animate px-1 py-2 border-b border-slate-200/70 last:border-b-0 transition-transform duration-300 ease-out hover:translate-x-0.5"
+                  className="service-card-animate min-w-0 shrink-0 rounded-xl border border-slate-200/70 bg-white/60 px-3 py-2 transition-transform duration-300 ease-out hover:translate-x-0.5 lg:rounded-none lg:border-0 lg:bg-transparent lg:px-1 lg:py-2 lg:border-b lg:border-slate-200/70 lg:last:border-b-0"
                   style={{ animationDelay: `${240 + index * 110}ms` }}
                 >
                   <h3 className="text-sm font-semibold text-slate-800 tracking-tight">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  <p className="hidden lg:block text-xs text-slate-500 mt-1 leading-relaxed">
                     {item.subtitle}
                   </p>
                 </div>
@@ -180,6 +180,77 @@ const ProductListingPage = () => {
             </div>
             <p className="text-slate-700 font-medium">Something went wrong</p>
             <p className="text-slate-400 text-sm mt-1">{listingErrorMessage}</p>
+          </div>
+        )}
+
+        {/* Listing Header + Filters */}
+        {!loading && !hasListingError && (
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
+                Discover Walton Products
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">
+                {totalCount} items available
+              </p>
+            </div>
+
+            <div className="flex gap-3 w-full lg:w-auto lg:max-w-[68%] lg:justify-end flex-nowrap overflow-x-auto pb-1">
+              <select
+                value={categoryFilter}
+                onChange={(e) => onCategoryFilterChange(e.target.value)}
+                className="filter-select"
+              >
+                <option value={ALL_FILTER_VALUE}>All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={priceFilter}
+                onChange={(e) =>
+                  onPriceFilterChange(e.target.value as PriceFilterValue)
+                }
+                className="filter-select"
+              >
+                {PRICE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={availabilityFilter}
+                onChange={(e) =>
+                  onAvailabilityFilterChange(
+                    e.target.value as AvailabilityFilterValue
+                  )
+                }
+                className="filter-select"
+              >
+                {AVAILABILITY_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sort}
+                onChange={(e) => onSortChange(e.target.value as SortValue)}
+                className="filter-select"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
 
@@ -220,75 +291,6 @@ const ProductListingPage = () => {
         {/* Product Grid */}
         {!loading && !hasListingError && filteredAndSorted.length > 0 && (
           <>
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
-                  Discover Walton Products
-                </h2>
-                {!loading && (
-                  <p className="text-sm text-slate-500 mt-1">
-                    {totalCount} items available
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-3 w-full lg:w-auto lg:max-w-[68%] lg:justify-end flex-nowrap overflow-x-auto pb-1">
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => onCategoryFilterChange(e.target.value)}
-                  className="filter-select"
-                >
-                  <option value={ALL_FILTER_VALUE}>All categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={priceFilter}
-                  onChange={(e) =>
-                    onPriceFilterChange(e.target.value as PriceFilterValue)
-                  }
-                  className="filter-select"
-                >
-                  {PRICE_FILTER_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={availabilityFilter}
-                  onChange={(e) =>
-                    onAvailabilityFilterChange(
-                      e.target.value as AvailabilityFilterValue
-                    )
-                  }
-                  className="filter-select"
-                >
-                  {AVAILABILITY_FILTER_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={sort}
-                  onChange={(e) => onSortChange(e.target.value as SortValue)}
-                  className="filter-select"
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSorted.map((product, index) => (
                 <ProductCard

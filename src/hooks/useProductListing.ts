@@ -82,10 +82,7 @@ export const useProductListing = () => {
       setApiMessage(undefined);
 
       try {
-        const filter: ProductFilterInput = {
-          isActive: null,
-          ...(debouncedSearch ? { enName: debouncedSearch } : {}),
-        };
+        const filter: ProductFilterInput = { isActive: null };
 
         let skip = 0;
         let expectedCount = 0;
@@ -140,7 +137,25 @@ export const useProductListing = () => {
         }
       } catch (caughtError) {
         if (!ignoreResponse) {
-          setError(caughtError as ApolloError | Error);
+          const apolloError = caughtError as ApolloError;
+          const networkStatusCode = (
+            apolloError.networkError as
+              | { statusCode?: number; response?: { status?: number } }
+              | undefined
+          )?.statusCode ?? (
+            apolloError.networkError as
+              | { statusCode?: number; response?: { status?: number } }
+              | undefined
+          )?.response?.status;
+
+          if (networkStatusCode === 429) {
+            setError(null);
+            setApiStatusCode(429);
+            setApiMessage("Too many requests. Please wait a moment and try again.");
+            return;
+          }
+
+          setError(apolloError);
           setAllProducts(EMPTY_PRODUCTS);
         }
       } finally {
@@ -155,23 +170,33 @@ export const useProductListing = () => {
     return () => {
       ignoreResponse = true;
     };
-  }, [debouncedSearch]);
+  }, []);
 
   const hasApiError =
     typeof apiStatusCode === "number" && apiStatusCode !== 200;
+
+  const searchedProducts = useMemo(() => {
+    if (!debouncedSearch) return allProducts;
+
+    const query = debouncedSearch.toLowerCase();
+    return allProducts.filter((product) => {
+      const enName = product.enName?.toLowerCase() ?? "";
+      return enName.includes(query);
+    });
+  }, [allProducts, debouncedSearch]);
 
   const categories = useMemo(() => {
     return getUniqueCategories(allProducts);
   }, [allProducts]);
 
   const filteredAndSortedAll = useMemo(() => {
-    return filterAndSortProducts(allProducts, {
+    return filterAndSortProducts(searchedProducts, {
       categoryFilter,
       availabilityFilter,
       priceFilter,
       sort,
     });
-  }, [allProducts, categoryFilter, availabilityFilter, priceFilter, sort]);
+  }, [searchedProducts, categoryFilter, availabilityFilter, priceFilter, sort]);
 
   const totalCount = filteredAndSortedAll.length;
   const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
