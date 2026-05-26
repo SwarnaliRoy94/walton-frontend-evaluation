@@ -14,6 +14,7 @@ import {
 } from "@/lib/pricing";
 import { useCartStore } from "@/store/cartStore";
 import { GetProductsResponse, ProductAttribute, ProductVariant } from "@/types";
+import { useOptimisticCartQuantity } from "./useOptimisticCartQuantity";
 
 interface DetailTab {
   label: string;
@@ -59,7 +60,12 @@ export const useProductDetail = () => {
     (item) => item.selectedVariant.posItemCode === selectedVariant?.posItemCode
   );
   const cartQuantity = cartItem?.quantity ?? 0;
-  const canIncreaseQuantity = cartQuantity < maxStock;
+  const {
+    optimisticCartQuantity,
+    isInCart,
+    canIncreaseQuantity,
+    runOptimisticAction,
+  } = useOptimisticCartQuantity(cartQuantity, maxStock);
 
   const tabs = useMemo(() => {
     return PRODUCT_DETAIL_TAB_CONFIGS.map(({ key, label }) => ({
@@ -84,28 +90,46 @@ export const useProductDetail = () => {
   };
 
   const onAddToCart = (): void => {
-    if (!product || !selectedVariant || isOutOfStock) return;
+    if (!product || !selectedVariant || isOutOfStock || !canIncreaseQuantity) return;
+    runOptimisticAction("add");
     addItem(product, selectedVariant);
   };
 
   const onDecreaseCartQuantity = (): void => {
-    if (!cartItem) return;
-    if (cartQuantity === 1) {
-      removeItem(cartItem.selectedVariant.posItemCode);
+    const variantCode = selectedVariant?.posItemCode;
+    if (!variantCode || !isInCart) return;
+
+    const nextQuantity = Math.max(0, optimisticCartQuantity - 1);
+    runOptimisticAction("decrease");
+
+    if (nextQuantity === 0) {
+      removeItem(variantCode);
       return;
     }
 
-    updateQuantity(cartItem.selectedVariant.posItemCode, cartQuantity - 1);
+    updateQuantity(variantCode, nextQuantity);
   };
 
   const onIncreaseCartQuantity = (): void => {
-    if (!cartItem || !canIncreaseQuantity) return;
-    updateQuantity(cartItem.selectedVariant.posItemCode, cartQuantity + 1);
+    if (!product || !selectedVariant || !canIncreaseQuantity) return;
+
+    const variantCode = selectedVariant.posItemCode;
+    const nextQuantity = Math.min(maxStock, optimisticCartQuantity + 1);
+    runOptimisticAction("increase");
+
+    if (!cartItem) {
+      addItem(product, selectedVariant);
+      return;
+    }
+
+    updateQuantity(variantCode, nextQuantity);
   };
 
   const onRemoveFromCart = (): void => {
-    if (!cartItem) return;
-    removeItem(cartItem.selectedVariant.posItemCode);
+    const variantCode = selectedVariant?.posItemCode;
+    if (!variantCode || !isInCart) return;
+    runOptimisticAction("remove");
+    removeItem(variantCode);
   };
 
   return {
@@ -123,8 +147,8 @@ export const useProductDetail = () => {
     hasDiscount,
     discountSummary,
     isOutOfStock,
-    cartItem,
-    cartQuantity,
+    isInCart,
+    cartQuantity: optimisticCartQuantity,
     canIncreaseQuantity,
     tabs,
     activeTab: safeActiveTab,

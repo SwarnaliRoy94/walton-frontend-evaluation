@@ -25,6 +25,7 @@ A Next.js 16 + GraphQL frontend implementation for Walton Plaza product listing 
 - Global cart drawer with increment/decrement/remove, total calculation, and clear cart.
 - Persisted cart state via localStorage (`walton-cart`).
 - Above-the-fold image loading optimizations for better LCP behavior.
+- React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
 
 ## Pricing and Variant Logic
 
