@@ -5,6 +5,7 @@ This is a product listing and product details webpage with Next.js 16 and GraphQ
 ## Architecture Decisions and Trade-offs
 
 ### 1) State Management: Zustand over Redux / Context API
+
 Decision:
 Used Zustand for cart state, with localStorage persistence over Redux/Context API
 
@@ -70,8 +71,10 @@ Reason:
 
 ### 6) Search constraints and approach
 
-Decision:
-Kept search scoped to currently loaded page data. Search operates on the current page only. This is a reflection of the API's capabilities rather than a brittle workaround.
+I wanted search to work across all 1829 products, not just the 12 visible on the current page.
+But the API has two hard constraints that made this difficult:
+- No name-based filter — only `uid`, `posItemCode`, and `isActive` are supported
+- Hard server-side cap of 30 items per request regardless of `limit` sent
 
 Reason:
 The Walton GraphQL API has two constraints that affected this implementation:
@@ -84,26 +87,25 @@ The Walton GraphQL API has two constraints that affected this implementation:
 - Adding delays between batches resolved the rate-limiting but made initial load unacceptably slow.
 - Reverted to standard server-side pagination (30 items per page).
 
-In a production system, this would be solved by either:
-- A dedicated search endpoint with name-based filtering on the backend
-- A background job that syncs products to a searchable index
+In a production system, this can be solved by either a dedicated search endpoint with name-based filtering on the backend or a background job that syncs products to a searchable index.
 
-### 7) Security decisions
+### 7) Sanitizing API-provided HTML content
 
-Decision:
-Sanitized API-provided rich text before rendering.
+When building the product detail tabs (Warranty, Terms, Basic Info etc.), I noticed the API was returning raw HTML strings inside `enName` values — things like `<p>Guarantee: 1 Year</p>` rendering as plain text on screen.
 
-Reason:
-- API attribute values may include HTML markup.
-- Raw HTML rendering risks script injection if content is ever unsafe.
+The quick fix was `dangerouslySetInnerHTML`, which worked, but I wasn't comfortable leaving raw API HTML unfiltered — if the content ever contains a `<script>` tag or malicious markup, it would execute directly in the browser.
 
-Implementation:
-- `dompurify` sanitizes untrusted HTML.
-- `html-react-parser` converts sanitized HTML to React nodes.
+So I installed `dompurify` to sanitize the HTML before rendering, and `html-react-parser` to convert the cleaned HTML into proper React nodes.
+It adds two dependencies and a small rendering step, but I assume it's the right call for content coming from an external API where you don't fully 
+control what gets stored.
 
-Trade-off:
-- Adds dependency and rendering pipeline complexity.
-- Sanitization rules require maintenance if content format expands.
+### 8) Next.js image host policy (`remotePatterns`)
+
+While building the product listing and detail pages, I noticed product images were breaking with a Next.js `Invalid src prop` error. The API was returning image URLs from multiple different hostnames — `cdn.waltonplaza.com.bd`, `devcdn.waltonplaza.com.bd`, and `walcart-dev-storage.s3.ap-southeast-1.amazonaws.com` and each new one required a separate config update.
+
+To avoid repeatedly hitting this during development, I switched to a wildcard `hostname: "**"` pattern that accepts any HTTPS image source. This kept the focus on building features rather than chasing hostnames.
+
+I'm aware this is broader than ideal for production. Once the full host inventory is confirmed, it can be restricted back to explicit trusted hostnames only.
 
 ## Tech Stack
 
