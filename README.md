@@ -7,12 +7,13 @@ This is a product listing and product details webpage with Next.js 16 and GraphQ
 ### 1) State Management: Zustand over Redux / Context API
 
 Decision:
-Used Zustand for cart state, with localStorage persistence over Redux/Context API
+Used Zustand for shared UI state: persisted cart state and cross-component product search state.
 
 Reason:
-- There is only one mutable state across the pages—the cart, which isn't very large.
+- Cart needs global access with persistence (`walton-cart`) across pages.
+- Product search input lives in `Header` while listing logic lives in PLP hook/components, so a small shared store avoids prop drilling.
 - Zustand provides low boilerplate store API and targeted subscriptions.
-- It is easy to persist using Zustand middleware: `walton-cart`.
+- It is easy to persist only the required domain (`cart`) while keeping transient UI state (`product listing search`) non-persisted.
 
 Trade-off:
 - Redux has more conventions and ecosystem tools for really large state graphs.
@@ -82,15 +83,15 @@ I'm aware this is broader than ideal for production. Once the full host inventor
 - React 19
 - TypeScript (strict mode)
 - Apollo Client
-- Zustand (persisted cart state)
+- Zustand (persisted cart + shared listing search state)
 - Tailwind CSS v4
 
 ## Implemented Features
 
 - Product listing page with server-side pagination.
 - Client-side sorting (price asc/desc, rating asc/desc).
-- Client-side filters (category, price range, stock availability).
-- Search on currently loaded page data.
+- Client-side filters (category, price range, stock availability, rating).
+- Search shared between Header input and product listing via Zustand store.
 - Product cards with discount ribbon (`% OFF`), MRP vs selling price, save amount, and variant chips.
 - Add-to-cart CTA that switches to quantity controls and remove action.
 - Product details page with image gallery, variant selection, stock/price/discount summary, and cart controls.
@@ -139,6 +140,7 @@ src/
     safeHtml.tsx
   store/
     cartStore.ts
+    productListingStore.ts
   types/
     index.ts
 ```
