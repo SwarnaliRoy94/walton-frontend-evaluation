@@ -1,12 +1,115 @@
 # Walton Frontend Evaluation
 
-A Next.js 16 + GraphQL frontend implementation for Walton Plaza product listing and product details.
+This is a product listing and product details webpage with Next.js 16 and GraphQL as the frontend technology.
+
+## Architecture Decisions and Trade-offs
+
+### 1) State Management: Zustand over Redux / Context API
+Decision:
+Used Zustand for cart state, with localStorage persistence over Redux/Context API
+
+Reason:
+- There is only one mutable state across the pages—the cart, which isn't very large.
+- Zustand provides low boilerplate store API and targeted subscriptions.
+- It is easy to persist using Zustand middleware: `walton-cart`.
+
+Trade-off:
+- Redux has more conventions and ecosystem tools for really large state graphs.
+- Without any additional memoization patterns, Context API can be simple and verbose and become a source of clutter without the need of extra state management.
+
+### 2) React 19 Feature: `useOptimistic` for cart interactions
+
+Decision:
+Used React 19 `useOptimistic` for add/increase/decrease/remove cart quantity UX.
+
+Reason:
+- Cart actions are frequent and need to happen immediately.
+- “Optimistic” updates enhance perceived responsiveness.
+- Contains at least one meaningful user flow that utilizes a modern feature of React 19.
+
+Trade-off:
+- Increases state reconciliation complexity over just local updates being strictly synchronous.
+- Needs to be updated with transitional support (startTransition) to prevent runtime warnings.
+
+### 3) Pagination over infinite scroll
+
+Decision:
+Used explicit pagination for product listing over infinite scroll.
+
+Reason:
+- Current API behavior is most reliable with bounded, paged requests.
+- Pagination provides deterministic navigation and easier control over request volume.
+- It avoids aggressive client-side batching that can trigger failures/rate-limit behavior.
+
+Trade-off:
+- Infinite scroll can feel more fluid for discovery-heavy browsing.
+
+### 4) Server vs Client Component split
+
+Decision:
+Keep route entries and layout as Server Components, and isolate interactive UI in Client Components.
+
+Reason :
+- Makes boundaries explicit in App Router architecture.
+- Keeps client-side hooks/state where interaction is required.
+- Better aligns with performance-oriented Next.js patterns.
+
+Trade-off:
+- Adds a thin wrapper layer (`app/.../page.tsx` -> client page component), which is extra structure to maintain.
+
+### 5) Visual system: Slate + Teal + Indigo (light variants)
+
+Decision:
+Used a light, cool-toned palette with slate neutrals, indigo accents, and soft teal backgrounds.
+
+Reason:
+- Supports a product-commerce UI that features a soothing, simple, and reliable appearance.
+- Light variants enhance readability and minimize visual fatigue on listing/detail pages with rich content.
+- Indigo offers even interaction/focus accents, slate has neutral hierarchy.
+- Clear semantic space for red/green stock/discount signals.
+
+### 6) Search constraints and approach
+
+Decision:
+Kept search scoped to currently loaded page data. Search operates on the current page only. This is a reflection of the API's capabilities rather than a brittle workaround.
+
+Reason:
+The Walton GraphQL API has two constraints that affected this implementation:
+1. No name-based filter — available filters are limited to `uid`, `posItemCode`, and `isActive`
+2. Hard server-side cap of 30 items per request regardless of the `limit` value sent
+
+**What was attempted:**
+- To support full-text search across all products, a batch-fetching approach was implemented using Apollo's `fetchMore` — fetching all 1829 products in batches of 30 requests and accumulating them client-side.
+- This worked technically but caused rate-limiting errors (`Failed to fetch`) from the API when requests fired in rapid succession.
+- Adding delays between batches resolved the rate-limiting but made initial load unacceptably slow.
+- Reverted to standard server-side pagination (30 items per page).
+
+In a production system, this would be solved by either:
+- A dedicated search endpoint with name-based filtering on the backend
+- A background job that syncs products to a searchable index
+
+### 7) Security decisions
+
+Decision:
+Sanitized API-provided rich text before rendering.
+
+Reason:
+- API attribute values may include HTML markup.
+- Raw HTML rendering risks script injection if content is ever unsafe.
+
+Implementation:
+- `dompurify` sanitizes untrusted HTML.
+- `html-react-parser` converts sanitized HTML to React nodes.
+
+Trade-off:
+- Adds dependency and rendering pipeline complexity.
+- Sanitization rules require maintenance if content format expands.
 
 ## Tech Stack
 
 - Next.js 16 (App Router)
 - React 19
-- TypeScript
+- TypeScript (strict mode)
 - Apollo Client
 - Zustand (persisted cart state)
 - Tailwind CSS v4
@@ -26,60 +129,17 @@ A Next.js 16 + GraphQL frontend implementation for Walton Plaza product listing 
 - Persisted cart state via localStorage (`walton-cart`).
 - Above-the-fold image loading optimizations for better LCP behavior.
 - React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
-- Sanitized rich-text rendering for PDP attribute content to avoid XSS while preserving basic formatting.
-- PLP API `statusCode`/`message` handling (business-level error state in addition to transport errors).
-- Explicit Server/Client boundary with Server route/layout entries.
-- `app/layout.tsx` and route files are Server Components.
-- Interactive UI (`Header`, Apollo context consumers, PLP/PDP UI blocks) are isolated Client Components.
-
-## Pricing and Variant Logic
-
-- Variant selection prefers first in-stock variant, else falls back to first variant.
-- Selling price calculation supports percentage discount, flat discount, and `discount.value` fallback.
-- Discount UI derives `% OFF` badge text and `Save ৳X` text from computed pricing.
-- Stock-aware cart limits prevent adding beyond available quantity.
-
-## Search and Pagination Strategy
-
-The Walton GraphQL API constraints directly affect UX strategy:
-
-- Available backend filters are limited to `uid`, `posItemCode`, and `isActive` (no product-name filter).
-- API responses are effectively capped at 30 items per request.
-
-What was evaluated:
-
-- A batch-fetch strategy (fetching all products client-side in multiple requests) worked technically.
-- In practice it triggered API rate-limit/fetch failures when many requests were fired quickly.
-- Throttling those requests avoided failures but caused unacceptable initial load latency.
-
-Current decision:
-
-- Use reliable paginated fetching.
-- Search is intentionally scoped to the currently loaded page dataset.
-
-## Security & Error Handling Notes
-
-- The API can return HTML-formatted strings for product attribute values (`<p>`, `<br>`, lists, etc.).
-- To keep formatting without exposing the app to script injection, HTML is sanitized with `dompurify` and then parsed into React nodes with `html-react-parser`.
-
-#### Why these packages
-
-- `dompurify`: industry-standard client-side HTML sanitizer for untrusted content.
-- `html-react-parser`: converts sanitized HTML string to React nodes cleanly, enabling formatted content rendering without raw string output.
-
-This combination was chosen to balance:
-- Security (sanitization)
-- Correct presentation (formatted text support)
-- Maintainability (small, focused utility)
+- Explicit Server/Client boundary with server route/layout entries and isolated interactive client islands.
 
 ## Project Structure
 
 ```text
 src/
   app/
+    layout.tsx                  # Server layout entry
     page.tsx                    # Redirects / to /products (preserves query params)
-    products/page.tsx           # Product listing UI
-    products/[id]/page.tsx      # Product detail UI
+    products/page.tsx           # Server route entry -> ProductListingClient
+    products/[id]/page.tsx      # Server route entry -> ProductDetailClient
   components/
     pages/
       ProductListingClient.tsx
@@ -99,11 +159,13 @@ src/
     useProductListing.ts
     useProductDetail.ts
     useProductCard.ts
+    useOptimisticCartQuantity.ts
   lib/
     apollo.ts
     apolloWrapper.tsx
     pricing.ts
     productListing.ts
+    safeHtml.tsx
   store/
     cartStore.ts
   types/
@@ -121,7 +183,7 @@ npm install
 2. Create `.env.local`:
 
 ```bash
-NEXT_PUBLIC_GRAPHQL_URL=url
+NEXT_PUBLIC_GRAPHQL_URL= (backend url given by walton)
 ```
 
 3. Start development server:
@@ -142,8 +204,3 @@ http://localhost:3000
 - `npm run build` - create production build
 - `npm run start` - run production server
 - `npm run lint` - run ESLint
-
-## Notes
-
-- This codebase intentionally prioritizes correctness and stability against current API behavior.
-- Some UI behaviors (search scope, pagination strategy) are constrained.
