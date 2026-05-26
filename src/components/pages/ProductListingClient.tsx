@@ -13,6 +13,7 @@ import {
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { useProductListing } from "@/hooks/useProductListing";
+import Image from "next/image";
 
 const SERVICE_HIGHLIGHTS = [
   {
@@ -63,11 +64,36 @@ const ProductListingPage = () => {
 
   return (
     <main className="page-shell">
-      <section className="listing-container pt-6">
-        <div className="rounded-[30px] border border-slate-200 bg-linear-to-r from-slate-100 via-[#faf7ff] to-sky-50 overflow-hidden shadow-[0_24px_46px_-34px_rgba(15,23,42,0.45)]">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_.9fr] items-start gap-5 p-6 sm:p-8">
+      <section>
+        <div className="relative overflow-hidden bg-linear-to-r from-transparent via-[#faf7ff]/85 to-transparent">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden lg:block"
+          >
+            <div className="absolute inset-y-0 right-0 w-[100%] overflow-hidden">
+              <Image
+                src="/99b67da4-359d-474e-9dac-8df713cb5e38.jpeg"
+                alt=""
+                fill
+                sizes="52vw"
+                className="object-cover object-center opacity-22 blur-[1px] scale-108"
+              />
+              <div className="absolute inset-0 bg-linear-to-l from-white/15 via-[#faf7ff]/72 to-transparent" />
+            </div>
+            {/* <div className="absolute right-2 top-5 h-44 w-44 overflow-hidden rounded-full border border-white/55 shadow-[0_20px_36px_-22px_rgba(15,23,42,0.5)]">
+              <Image
+                src="/03787a2d-d881-43e8-b78f-d573b9558e55.jpeg"
+                alt=""
+                fill
+                sizes="176px"
+                className="object-cover opacity-70"
+              />
+            </div> */}
+          </div>
+
+          <div className="relative listing-container grid grid-cols-1 lg:grid-cols-[1.35fr_.9fr] items-start gap-5 py-5 sm:py-6">
             <div className="space-y-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700">
                 Walton Smart Living Collection
               </span>
               <div className="space-y-2.5">
@@ -100,7 +126,7 @@ const ProductListingPage = () => {
                 ].map((item, index) => (
                   <article
                     key={item.title}
-                    className="feature-card-animate rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.65)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_38px_-24px_rgba(15,23,42,0.6)]"
+                    className="feature-card-animate rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3 shadow-[0_10px_20px_-22px_rgba(15,23,42,0.45)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)]"
                     style={{ animationDelay: `${120 + index * 90}ms` }}
                   >
                     <h3 className="text-sm font-semibold text-slate-800">
@@ -113,7 +139,7 @@ const ProductListingPage = () => {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 self-center">
+            <div className="grid grid-cols-1 gap-3 self-center lg:pl-4 lg:border-l lg:border-slate-200/60">
               {SERVICE_HIGHLIGHTS.map((item, index) => (
                 <div
                   key={item.title}

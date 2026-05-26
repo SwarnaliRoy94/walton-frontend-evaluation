@@ -21,7 +21,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${manrope.variable} ${spaceGrotesk.variable} pt-20`}
+        className={`${manrope.variable} ${spaceGrotesk.variable} pt-16`}
       >
         <Header />
         <ApolloWrapper>
