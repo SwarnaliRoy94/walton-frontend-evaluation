@@ -24,6 +24,8 @@ const ProductListingPage = () => {
     availabilityFilter,
     loading,
     error,
+    apiMessage,
+    hasApiError,
     totalCount,
     totalPages,
     categories,
@@ -38,6 +40,8 @@ const ProductListingPage = () => {
     onPreviousPage,
     onNextPage,
   } = useProductListing();
+  const hasListingError = Boolean(error) || hasApiError;
+  const listingErrorMessage = error?.message ?? apiMessage ?? "Something went wrong";
 
   return (
     <main className="page-shell">
@@ -125,7 +129,7 @@ const ProductListingPage = () => {
 
       <div className="listing-container py-8">
         {/* Error */}
-        {error && (
+        {hasListingError && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
               <svg
@@ -143,7 +147,7 @@ const ProductListingPage = () => {
               </svg>
             </div>
             <p className="text-slate-700 font-medium">Something went wrong</p>
-            <p className="text-slate-400 text-sm mt-1">{error.message}</p>
+            <p className="text-slate-400 text-sm mt-1">{listingErrorMessage}</p>
           </div>
         )}
 
@@ -157,7 +161,7 @@ const ProductListingPage = () => {
         )}
 
         {/* Empty */}
-        {!loading && !error && filteredAndSorted.length === 0 && (
+        {!loading && !hasListingError && filteredAndSorted.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
               <svg
@@ -182,7 +186,7 @@ const ProductListingPage = () => {
         )}
 
         {/* Product Grid */}
-        {!loading && !error && filteredAndSorted.length > 0 && (
+        {!loading && !hasListingError && filteredAndSorted.length > 0 && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {filteredAndSorted.map((product, index) => (

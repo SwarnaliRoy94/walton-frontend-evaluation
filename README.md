@@ -26,6 +26,8 @@ A Next.js 16 + GraphQL frontend implementation for Walton Plaza product listing 
 - Persisted cart state via localStorage (`walton-cart`).
 - Above-the-fold image loading optimizations for better LCP behavior.
 - React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
+- Sanitized rich-text rendering for PDP attribute content to avoid XSS while preserving basic formatting.
+- PLP API `statusCode`/`message` handling (business-level error state in addition to transport errors).
 
 ## Pricing and Variant Logic
 
@@ -52,11 +54,20 @@ Current decision:
 - Use reliable paginated fetching.
 - Search is intentionally scoped to the currently loaded page dataset.
 
-Production-grade recommendation:
+## Security & Error Handling Notes
 
-- Add a backend name-based search endpoint, or
-- Integrate a dedicated search index (Elasticsearch/Algolia), or
-- Sync products to a searchable store via background jobs.
+- The API can return HTML-formatted strings for product attribute values (`<p>`, `<br>`, lists, etc.).
+- To keep formatting without exposing the app to script injection, HTML is sanitized with `dompurify` and then parsed into React nodes with `html-react-parser`.
+
+#### Why these packages
+
+- `dompurify`: industry-standard client-side HTML sanitizer for untrusted content.
+- `html-react-parser`: converts sanitized HTML string to React nodes cleanly, enabling formatted content rendering without raw string output.
+
+This combination was chosen to balance:
+- Security (sanitization)
+- Correct presentation (formatted text support)
+- Maintainability (small, focused utility)
 
 ## Project Structure
 

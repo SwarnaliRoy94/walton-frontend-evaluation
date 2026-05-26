@@ -63,6 +63,10 @@ export const useProductListing = () => {
   const products = data?.getProducts?.result?.products ?? EMPTY_PRODUCTS;
   const totalCount = data?.getProducts?.result?.count ?? 0;
   const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
+  const apiStatusCode = data?.getProducts?.statusCode;
+  const apiMessage = data?.getProducts?.message;
+  const hasApiError =
+    typeof apiStatusCode === "number" && apiStatusCode !== 200;
 
   const categories = useMemo(() => {
     return getUniqueCategories(products);
@@ -132,6 +136,9 @@ export const useProductListing = () => {
     availabilityFilter,
     loading,
     error,
+    apiStatusCode,
+    apiMessage,
+    hasApiError,
     totalCount,
     totalPages,
     categories,

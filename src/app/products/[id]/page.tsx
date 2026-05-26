@@ -3,6 +3,7 @@
 import ProductImageGallery from "@/components/ProductImageGallery";
 import { getSellingPrice } from "@/lib/pricing";
 import { useProductDetail } from "@/hooks/useProductDetail";
+import { renderSafeHtml } from "@/lib/safeHtml";
 import { ProductAttribute } from "@/types";
 import Link from "next/link";
 
@@ -26,12 +27,9 @@ const AttributeSection = ({
             }`}
           >
             <span className="text-slate-500 w-40 shrink-0">{attr.enLabel}</span>
-            <span
-              className="text-slate-800 prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: attr.values.map((v) => v.enName).join(", "),
-              }}
-            />
+            <span className="text-slate-800 prose prose-sm max-w-none">
+              {renderSafeHtml(attr.values.map((v) => v.enName).join(", "))}
+            </span>
           </div>
         ))}
       </div>
