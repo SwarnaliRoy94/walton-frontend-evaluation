@@ -54,11 +54,20 @@ Current decision:
 - Use reliable paginated fetching.
 - Search is intentionally scoped to the currently loaded page dataset.
 
-Production-grade recommendation:
+## Security & Error Handling Notes
 
-- Add a backend name-based search endpoint, or
-- Integrate a dedicated search index (Elasticsearch/Algolia), or
-- Sync products to a searchable store via background jobs.
+- The API can return HTML-formatted strings for product attribute values (`<p>`, `<br>`, lists, etc.).
+- To keep formatting without exposing the app to script injection, HTML is sanitized with `dompurify` and then parsed into React nodes with `html-react-parser`.
+
+#### Why these packages
+
+- `dompurify`: industry-standard client-side HTML sanitizer for untrusted content.
+- `html-react-parser`: converts sanitized HTML string to React nodes cleanly, enabling formatted content rendering without raw string output.
+
+This combination was chosen to balance:
+- Security (sanitization)
+- Correct presentation (formatted text support)
+- Maintainability (small, focused utility)
 
 ## Project Structure
 
@@ -132,10 +141,3 @@ http://localhost:3000
 
 - This codebase intentionally prioritizes correctness and stability against current API behavior.
 - Some UI behaviors (search scope, pagination strategy) are constrained.
-
-## Security & Error Handling Notes
-
-- The API can return HTML-formatted strings for product attribute values (`<p>`, `<br>`, lists, etc.).
-- To keep formatting without exposing the app to script injection, HTML is sanitized with `dompurify` and then parsed into React nodes with `html-react-parser`.
-- This is safer than rendering raw HTML directly, and avoids showing literal tags in the UI.
-- On the PLP, both GraphQL transport errors and business response errors (`statusCode !== 200`) are handled with user-visible error messaging.
