@@ -23,7 +23,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
     savingsText,
     hasDiscount,
     isOutOfStock,
-    cartItem,
+    isInCart,
     cartQuantity,
     canIncreaseQuantity,
     onVariantSelect,
@@ -134,7 +134,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
         </div>
 
         {/* Add to Cart */}
-        {cartItem ? (
+        {isInCart ? (
           <div className="w-full py-2.5 px-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200 flex items-center justify-between gap-2">
             <span className="text-left">Added to cart</span>
             <div className="flex items-center gap-2">

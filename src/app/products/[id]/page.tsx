@@ -54,7 +54,7 @@ const ProductDetailPage = () => {
     hasDiscount,
     discountSummary,
     isOutOfStock,
-    cartItem,
+    isInCart,
     cartQuantity,
     canIncreaseQuantity,
     tabs,
@@ -206,7 +206,7 @@ const ProductDetailPage = () => {
 
             {/* CTA */}
             <div className="flex flex-col gap-3 mt-2">
-              {cartItem ? (
+              {isInCart ? (
                 <div className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold bg-green-50 text-green-700 border border-green-200 flex items-center justify-between gap-3">
                   <span className="text-left">Added to cart</span>
                   <div className="flex items-center gap-2">
