@@ -62,6 +62,7 @@ export interface PaginationInput {
 
 export interface ProductFilterInput {
   uid?: string;
+  enName?: string;
   posItemCode?: string;
   isActive?: boolean | null;
 }

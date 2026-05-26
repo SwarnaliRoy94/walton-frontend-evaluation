@@ -8,7 +8,6 @@ import { Product } from "@/types";
 import { getSellingPrice, getVariantStock, pickDisplayVariant } from "@/lib/pricing";
 
 export interface ListingFilters {
-  search: string;
   categoryFilter: string;
   availabilityFilter: AvailabilityFilterValue;
   priceFilter: PriceFilterValue;
@@ -39,11 +38,6 @@ export const getUniqueCategories = (products: Product[]): string[] => {
     uniqueCategories.add(getProductCategory(product));
   });
   return Array.from(uniqueCategories).sort((a, b) => a.localeCompare(b));
-};
-
-const matchesSearch = (product: Product, search: string): boolean => {
-  if (!search.trim()) return true;
-  return product.enName.toLowerCase().includes(search.toLowerCase());
 };
 
 const matchesCategory = (product: Product, categoryFilter: string): boolean => {
@@ -102,11 +96,10 @@ export const filterAndSortProducts = (
   products: Product[],
   filters: ListingFilters
 ): Product[] => {
-  const { search, categoryFilter, availabilityFilter, priceFilter, sort } = filters;
+  const { categoryFilter, availabilityFilter, priceFilter, sort } = filters;
 
   const filtered = products.filter(
     (product) =>
-      matchesSearch(product, search) &&
       matchesCategory(product, categoryFilter) &&
       matchesAvailability(product, availabilityFilter) &&
       matchesPrice(product, priceFilter)

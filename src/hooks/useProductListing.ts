@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery } from "@apollo/client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ApolloError } from "@apollo/client";
 import { GET_PRODUCTS } from "@/graphql/queries";
-import { GetProductsResponse, Product } from "@/types";
+import { GetProductsResponse, Product, ProductFilterInput } from "@/types";
 import {
   ALL_FILTER_VALUE,
   AvailabilityFilterValue,
@@ -16,8 +16,11 @@ import {
   filterAndSortProducts,
   getUniqueCategories,
 } from "@/lib/productListing";
+import { apolloClient } from "@/lib/apollo";
 
 const EMPTY_PRODUCTS: Product[] = [];
+const API_PAGE_LIMIT = 30;
+const SEARCH_DEBOUNCE_MS = 300;
 
 const getPaginationItems = (
   page: number,
@@ -48,43 +51,139 @@ export const useProductListing = () => {
   const [page, setPage] = useState<number>(0);
   const [sort, setSort] = useState<SortValue>(DEFAULT_SORT_VALUE);
   const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState<PriceFilterValue>(ALL_FILTER_VALUE);
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_FILTER_VALUE);
   const [availabilityFilter, setAvailabilityFilter] =
     useState<AvailabilityFilterValue>(ALL_FILTER_VALUE);
+  const [allProducts, setAllProducts] = useState<Product[]>(EMPTY_PRODUCTS);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<ApolloError | Error | null>(null);
+  const [apiStatusCode, setApiStatusCode] = useState<number | undefined>();
+  const [apiMessage, setApiMessage] = useState<string | undefined>();
 
-  const { data, loading, error } = useQuery<GetProductsResponse>(GET_PRODUCTS, {
-    variables: {
-      pagination: { skip: page * PRODUCTS_PER_PAGE, limit: PRODUCTS_PER_PAGE },
-      filter: { isActive: null },
-    },
-  });
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, SEARCH_DEBOUNCE_MS);
 
-  const products = data?.getProducts?.result?.products ?? EMPTY_PRODUCTS;
-  const totalCount = data?.getProducts?.result?.count ?? 0;
-  const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
-  const apiStatusCode = data?.getProducts?.statusCode;
-  const apiMessage = data?.getProducts?.message;
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    let ignoreResponse = false;
+
+    const fetchAllProducts = async () => {
+      setLoading(true);
+      setError(null);
+      setApiStatusCode(undefined);
+      setApiMessage(undefined);
+
+      try {
+        const filter: ProductFilterInput = {
+          isActive: null,
+          ...(debouncedSearch ? { enName: debouncedSearch } : {}),
+        };
+
+        let skip = 0;
+        let expectedCount = 0;
+        const aggregatedProducts: Product[] = [];
+
+        while (true) {
+          const { data } = await apolloClient.query<GetProductsResponse>({
+            query: GET_PRODUCTS,
+            variables: {
+              pagination: { skip, limit: API_PAGE_LIMIT },
+              filter,
+            },
+            fetchPolicy: "network-only",
+          });
+
+          const response = data?.getProducts;
+          if (!response) {
+            throw new Error("Invalid response from products API");
+          }
+
+          if (response.statusCode !== 200) {
+            if (!ignoreResponse) {
+              setApiStatusCode(response.statusCode);
+              setApiMessage(response.message);
+              setAllProducts(EMPTY_PRODUCTS);
+            }
+            return;
+          }
+
+          if (!ignoreResponse) {
+            setApiStatusCode(response.statusCode);
+            setApiMessage(response.message);
+          }
+
+          const batch = response.result?.products ?? EMPTY_PRODUCTS;
+          expectedCount = response.result?.count ?? 0;
+          aggregatedProducts.push(...batch);
+
+          if (
+            batch.length === 0 ||
+            aggregatedProducts.length >= expectedCount ||
+            batch.length < API_PAGE_LIMIT
+          ) {
+            break;
+          }
+
+          skip += batch.length;
+        }
+
+        if (!ignoreResponse) {
+          setAllProducts(aggregatedProducts);
+        }
+      } catch (caughtError) {
+        if (!ignoreResponse) {
+          setError(caughtError as ApolloError | Error);
+          setAllProducts(EMPTY_PRODUCTS);
+        }
+      } finally {
+        if (!ignoreResponse) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAllProducts();
+
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [debouncedSearch]);
+
   const hasApiError =
     typeof apiStatusCode === "number" && apiStatusCode !== 200;
 
   const categories = useMemo(() => {
-    return getUniqueCategories(products);
-  }, [products]);
+    return getUniqueCategories(allProducts);
+  }, [allProducts]);
 
-  const filteredAndSorted = useMemo(() => {
-    return filterAndSortProducts(products, {
-      search,
+  const filteredAndSortedAll = useMemo(() => {
+    return filterAndSortProducts(allProducts, {
       categoryFilter,
       availabilityFilter,
       priceFilter,
       sort,
     });
-  }, [products, search, categoryFilter, availabilityFilter, priceFilter, sort]);
+  }, [allProducts, categoryFilter, availabilityFilter, priceFilter, sort]);
+
+  const totalCount = filteredAndSortedAll.length;
+  const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
+
+  const safePage = totalPages > 0 ? Math.min(page, totalPages - 1) : 0;
+
+  const filteredAndSorted = useMemo(() => {
+    const start = safePage * PRODUCTS_PER_PAGE;
+    return filteredAndSortedAll.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [filteredAndSortedAll, safePage]);
 
   const paginationItems = useMemo(() => {
-    return getPaginationItems(page, totalPages);
-  }, [page, totalPages]);
+    return getPaginationItems(safePage, totalPages);
+  }, [safePage, totalPages]);
 
   const onSearchChange = (value: string): void => {
     setSearch(value);
@@ -128,7 +227,7 @@ export const useProductListing = () => {
   };
 
   return {
-    page,
+    page: safePage,
     sort,
     search,
     priceFilter,
