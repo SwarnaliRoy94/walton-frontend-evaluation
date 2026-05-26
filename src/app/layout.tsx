@@ -1,12 +1,28 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import ApolloWrapper from "@/lib/apolloWrapper";
+import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className="pt-16">
+      <body
+        suppressHydrationWarning
+        className={`${manrope.variable} ${spaceGrotesk.variable} pt-20`}
+      >
         <Header />
         <ApolloWrapper>
           {children}

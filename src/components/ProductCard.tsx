@@ -34,7 +34,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
   } = useProductCard(product);
 
   return (
-    <div className="group relative bg-slate-50 rounded-2xl border border-slate-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300 overflow-hidden flex flex-col">
+    <div className="group relative bg-linear-to-b from-white via-white to-[#faf7ff] rounded-3xl border border-slate-200/80 hover:border-violet-200 hover:shadow-[0_24px_50px_-34px_rgba(67,56,202,0.35)] transition-all duration-300 overflow-hidden flex flex-col">
       {/* Discount Badge */}
       {discountLabel && (
         <div className="discount-ribbon top-4">
@@ -44,7 +44,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
 
       {/* Out of stock badge */}
       {isOutOfStock && (
-        <div className="absolute top-3 right-3 z-10 bg-slate-800/80 text-white text-xs px-2.5 py-1 rounded-lg">
+        <div className="absolute top-3 right-3 z-10 bg-slate-900/85 text-white text-xs px-2.5 py-1 rounded-xl">
           Out of stock
         </div>
       )}
@@ -52,7 +52,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
       {/* Image */}
       <Link
         href={`/products/${product.uid}`}
-        className="block overflow-hidden bg-slate-50"
+        className="block overflow-hidden bg-linear-to-b from-[#f5f1ff] via-[#f7f5ff] to-[#edf1ff]"
       >
         <div className="relative w-full aspect-square overflow-hidden">
           {imageUrl ? (
@@ -62,7 +62,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               loading={imageLoading}
-              className="object-contain bg-indigo-50 p-4 group-hover:scale-105 transition-transform duration-500"
+              className="object-contain p-5 group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -85,9 +85,9 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
       </Link>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1 gap-3">
+      <div className="p-5 flex flex-col flex-1 gap-3">
         <Link href={`/products/${product.uid}`}>
-          <h2 className="text-sm font-medium text-slate-800 line-clamp-2 leading-snug hover:text-indigo-800 transition-colors">
+          <h2 className="text-sm font-semibold text-slate-800 line-clamp-2 leading-snug hover:text-indigo-800 transition-colors">
             {product.enName}
           </h2>
         </Link>
@@ -101,10 +101,10 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
                   key={v.posItemCode}
                   onClick={() => onVariantSelect(v.posItemCode)}
                   disabled={optionOutOfStock}
-                  className={`px-2 py-1 text-[11px] rounded-lg border transition ${
+                  className={`px-2 py-1 text-[11px] rounded-xl border transition ${
                     selectedVariant?.posItemCode === v.posItemCode
-                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      ? "border-violet-300 bg-violet-50 text-violet-700 font-semibold"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-violet-200"
                   } ${
                     optionOutOfStock ? "opacity-40 cursor-not-allowed" : ""
                   }`}
@@ -118,7 +118,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
 
         {/* Price */}
         <div className="flex items-start mt-auto">
-          <span className="text-base font-semibold text-indigo-900">
+          <span className="text-lg font-bold text-slate-900">
             ৳{sellingPrice.toLocaleString()}
           </span>
           {hasDiscount && (
@@ -135,7 +135,7 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
 
         {/* Add to Cart */}
         {isInCart ? (
-          <div className="w-full py-2.5 px-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200 flex items-center justify-between gap-2">
+          <div className="w-full py-2.5 px-3 rounded-2xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-between gap-2">
             <span className="text-left">Added to cart</span>
             <div className="flex items-center gap-2">
               <button
@@ -181,10 +181,10 @@ const ProductCard = ({ product, imageLoading = "lazy" }: Props) => {
           <button
             onClick={onAddToCart}
             disabled={isOutOfStock}
-            className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`w-full py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200 ${
               isOutOfStock
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                : "bg-indigo-200 text-indigo-900 hover:bg-indigo-400 hover:text-white active:scale-95"
+                : "bg-slate-900 text-white hover:bg-indigo-900 hover:-translate-y-0.5 active:scale-95"
             }`}
           >
             {isOutOfStock ? "Out of stock" : "Add to cart"}

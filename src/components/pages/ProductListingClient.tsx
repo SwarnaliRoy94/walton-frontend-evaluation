@@ -14,6 +14,25 @@ import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { useProductListing } from "@/hooks/useProductListing";
 
+const SERVICE_HIGHLIGHTS = [
+  {
+    title: "Official Warranty",
+    subtitle: "100% verified products with full manufacturer coverage.",
+  },
+  {
+    title: "Nationwide Delivery",
+    subtitle: "Fast dispatch and reliable delivery across Bangladesh.",
+  },
+  {
+    title: "Easy EMI",
+    subtitle: "Flexible installment options for your convenience.",
+  },
+  {
+    title: "24/7 Support",
+    subtitle: "Dedicated support team for purchase and after-sales help.",
+  },
+];
+
 const ProductListingPage = () => {
   const {
     page,
@@ -45,95 +64,177 @@ const ProductListingPage = () => {
 
   return (
     <main className="page-shell">
-      {/* Header */}
-      <div className="bg-white/100 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
-        <div className="listing-container py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="bg-slate-900 text-slate-100 text-xs sm:text-sm">
+        <div className="listing-container py-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+          <span className="font-medium tracking-wide">
+            Walton Electronics Sale is Live
+          </span>
+          <span className="text-slate-300">Up to 30% Off on selected products</span>
+          <button className="ml-1 rounded-full border border-slate-500 px-3 py-0.5 text-[11px] font-semibold hover:bg-slate-800 transition-colors">
+            Shop Now
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white/82 backdrop-blur-xl border-b border-slate-200/70">
+        <div className="listing-container py-5 grid grid-cols-1 lg:grid-cols-[1.45fr_1fr] gap-6 lg:items-start">
           <div>
-            <h1 className="text-xl font-semibold text-indigo-900 tracking-tight">
-              Products
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight [font-family:var(--font-space-grotesk)]">
+              Discover Walton Products
             </h1>
             {!loading && (
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-500 mt-1">
                 {totalCount} items available
               </p>
             )}
           </div>
 
-          <div className="flex gap-3 w-full sm:w-auto flex-wrap">
-            {/* Search */}
+          <div className="flex flex-col gap-3 w-full">
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search by product name..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="search-input"
+              className="search-input w-full sm:w-full"
             />
 
-            {/* Category */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => onCategoryFilterChange(e.target.value)}
-              className="filter-select"
-            >
-              <option value={ALL_FILTER_VALUE}>All categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-3 w-full flex-nowrap overflow-x-auto pb-1">
+              {/* Category */}
+              <select
+                value={categoryFilter}
+                onChange={(e) => onCategoryFilterChange(e.target.value)}
+                className="filter-select"
+              >
+                <option value={ALL_FILTER_VALUE}>All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
 
-            {/* Price */}
-            <select
-              value={priceFilter}
-              onChange={(e) => onPriceFilterChange(e.target.value as PriceFilterValue)}
-              className="filter-select"
-            >
-              {PRICE_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              {/* Price */}
+              <select
+                value={priceFilter}
+                onChange={(e) => onPriceFilterChange(e.target.value as PriceFilterValue)}
+                className="filter-select"
+              >
+                {PRICE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
 
-            {/* Availability */}
-            <select
-              value={availabilityFilter}
-              onChange={(e) =>
-                onAvailabilityFilterChange(e.target.value as AvailabilityFilterValue)
-              }
-              className="filter-select"
-            >
-              {AVAILABILITY_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              {/* Availability */}
+              <select
+                value={availabilityFilter}
+                onChange={(e) =>
+                  onAvailabilityFilterChange(e.target.value as AvailabilityFilterValue)
+                }
+                className="filter-select"
+              >
+                {AVAILABILITY_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
 
-            {/* Sort */}
-            <select
-              value={sort}
-              onChange={(e) => onSortChange(e.target.value as SortValue)}
-              className="filter-select"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+              {/* Sort */}
+              <select
+                value={sort}
+                onChange={(e) => onSortChange(e.target.value as SortValue)}
+                className="filter-select"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
+
+      <section className="listing-container pt-6">
+        <div className="rounded-[30px] border border-slate-200 bg-linear-to-r from-slate-100 via-[#faf7ff] to-sky-50 overflow-hidden shadow-[0_24px_46px_-34px_rgba(15,23,42,0.45)]">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_.9fr] items-start gap-5 p-6 sm:p-8">
+            <div className="space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700">
+                Walton Smart Living Collection
+              </span>
+              <div className="space-y-2.5">
+                <h2 className="text-3xl sm:text-4xl leading-tight font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
+                  Smart Living Starts Here
+                </h2>
+                <p className="text-slate-600 text-sm sm:text-base max-w-xl">
+                  Discover innovative electronics and home essentials crafted for
+                  performance, comfort, and everyday convenience.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {[
+                  {
+                    title: "Smart Entertainment",
+                    subtitle: "4K TVs and immersive sound",
+                  },
+                  {
+                    title: "Cooling Comfort",
+                    subtitle: "Efficient AC and climate control",
+                  },
+                  {
+                    title: "Home Essentials",
+                    subtitle: "Refrigerators and appliances",
+                  },
+                  {
+                    title: "Work & Study",
+                    subtitle: "Laptops and daily accessories",
+                  },
+                ].map((item, index) => (
+                  <article
+                    key={item.title}
+                    className="feature-card-animate rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.65)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_38px_-24px_rgba(15,23,42,0.6)]"
+                    style={{ animationDelay: `${120 + index * 90}ms` }}
+                  >
+                    <h3 className="text-sm font-semibold text-slate-800">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                      {item.subtitle}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 self-center">
+              {SERVICE_HIGHLIGHTS.map((item, index) => (
+                <div
+                  key={item.title}
+                  className="service-card-animate px-1 py-2 border-b border-slate-200/70 last:border-b-0 transition-transform duration-300 ease-out hover:translate-x-0.5"
+                  style={{ animationDelay: `${240 + index * 110}ms` }}
+                >
+                  <h3 className="text-sm font-semibold text-slate-800 tracking-tight">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    {item.subtitle}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="listing-container py-8">
         {/* Error */}
         {hasListingError && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
               <svg
-                className="w-8 h-8 text-red-400"
+                className="w-8 h-8 text-rose-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -188,7 +289,15 @@ const ProductListingPage = () => {
         {/* Product Grid */}
         {!loading && !hasListingError && filteredAndSorted.length > 0 && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
+                Featured Products
+              </h2>
+              <button className="text-sm font-semibold text-sky-700 hover:text-sky-900 transition-colors">
+                View all products →
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSorted.map((product, index) => (
                 <ProductCard
                   key={product.uid}
@@ -200,7 +309,7 @@ const ProductListingPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-12">
+              <div className="flex items-center justify-center gap-2 mt-14">
                 <button
                   onClick={onPreviousPage}
                   disabled={page === 0}
@@ -221,10 +330,10 @@ const ProductListingPage = () => {
                     <button
                       key={paginationItem}
                       onClick={() => onPageChange(paginationItem)}
-                      className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
+                      className={`w-9 h-9 rounded-2xl text-sm font-semibold transition-all ${
                         page === paginationItem
-                          ? "bg-indigo-400 text-white shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                          ? "bg-slate-900 text-white shadow-[0_12px_24px_-14px_rgba(23,42,104,0.8)]"
+                          : "border border-slate-200 bg-white text-slate-600 hover:border-sky-300 hover:-translate-y-0.5"
                       }`}
                     >
                       {paginationItem + 1}
