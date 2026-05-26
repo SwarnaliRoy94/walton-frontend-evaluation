@@ -58,48 +58,17 @@ Reason :
 Trade-off:
 - Adds a thin wrapper layer (`app/.../page.tsx` -> client page component), which is extra structure to maintain.
 
-### 5) Visual system: Slate + Teal + Indigo (light variants)
-
-Decision:
-Used a light, cool-toned palette with slate neutrals, indigo accents, and soft teal backgrounds.
-
-Reason:
-- Supports a product-commerce UI that features a soothing, simple, and reliable appearance.
-- Light variants enhance readability and minimize visual fatigue on listing/detail pages with rich content.
-- Indigo offers even interaction/focus accents, slate has neutral hierarchy.
-- Clear semantic space for red/green stock/discount signals.
-
-### 6) Search constraints and approach
-
-I wanted search to work across all 1829 products, not just the 12 visible on the current page.
-But the API has two hard constraints that made this difficult:
-- No name-based filter — only `uid`, `posItemCode`, and `isActive` are supported
-- Hard server-side cap of 30 items per request regardless of `limit` sent
-
-Reason:
-The Walton GraphQL API has two constraints that affected this implementation:
-1. No name-based filter — available filters are limited to `uid`, `posItemCode`, and `isActive`
-2. Hard server-side cap of 30 items per request regardless of the `limit` value sent
-
-**What was attempted:**
-- To support full-text search across all products, a batch-fetching approach was implemented using Apollo's `fetchMore` — fetching all 1829 products in batches of 30 requests and accumulating them client-side.
-- This worked technically but caused rate-limiting errors (`Failed to fetch`) from the API when requests fired in rapid succession.
-- Adding delays between batches resolved the rate-limiting but made initial load unacceptably slow.
-- Reverted to standard server-side pagination (30 items per page).
-
-In a production system, this can be solved by either a dedicated search endpoint with name-based filtering on the backend or a background job that syncs products to a searchable index.
-
-### 7) Sanitizing API-provided HTML content
+### 5) Sanitizing API-provided HTML content
 
 When building the product detail tabs (Warranty, Terms, Basic Info etc.), I noticed the API was returning raw HTML strings inside `enName` values — things like `<p>Guarantee: 1 Year</p>` rendering as plain text on screen.
 
 The quick fix was `dangerouslySetInnerHTML`, which worked, but I wasn't comfortable leaving raw API HTML unfiltered — if the content ever contains a `<script>` tag or malicious markup, it would execute directly in the browser.
 
 So I installed `dompurify` to sanitize the HTML before rendering, and `html-react-parser` to convert the cleaned HTML into proper React nodes.
-It adds two dependencies and a small rendering step, but I assume it's the right call for content coming from an external API where you don't fully 
+It adds two dependencies and a small rendering step, but I assume it's the right call for content coming from an external API where you don't fully
 control what gets stored.
 
-### 8) Next.js image host policy (`remotePatterns`)
+### 6) Next.js image host policy (`remotePatterns`)
 
 While building the product listing and detail pages, I noticed product images were breaking with a Next.js `Invalid src prop` error. The API was returning image URLs from multiple different hostnames — `cdn.waltonplaza.com.bd`, `devcdn.waltonplaza.com.bd`, and `walcart-dev-storage.s3.ap-southeast-1.amazonaws.com` and each new one required a separate config update.
 
