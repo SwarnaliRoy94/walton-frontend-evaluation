@@ -1,3 +1,5 @@
+"use client";
+
 import { useCartStore } from "@/store/cartStore";
 import CartDrawer from "./Cart/CartDrawer";
 import { useState } from "react";
