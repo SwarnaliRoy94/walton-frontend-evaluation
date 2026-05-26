@@ -13,12 +13,31 @@ import {
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { useProductListing } from "@/hooks/useProductListing";
+import Image from "next/image";
+
+const SERVICE_HIGHLIGHTS = [
+  {
+    title: "Official Warranty",
+    subtitle: "100% verified products with full manufacturer coverage.",
+  },
+  {
+    title: "Nationwide Delivery",
+    subtitle: "Fast dispatch and reliable delivery across Bangladesh.",
+  },
+  {
+    title: "Easy EMI",
+    subtitle: "Flexible installment options for your convenience.",
+  },
+  {
+    title: "24/7 Support",
+    subtitle: "Dedicated support team for purchase and after-sales help.",
+  },
+];
 
 const ProductListingPage = () => {
   const {
     page,
     sort,
-    search,
     priceFilter,
     categoryFilter,
     availabilityFilter,
@@ -31,7 +50,6 @@ const ProductListingPage = () => {
     categories,
     filteredAndSorted,
     paginationItems,
-    onSearchChange,
     onCategoryFilterChange,
     onPriceFilterChange,
     onAvailabilityFilterChange,
@@ -41,99 +59,113 @@ const ProductListingPage = () => {
     onNextPage,
   } = useProductListing();
   const hasListingError = Boolean(error) || hasApiError;
-  const listingErrorMessage = error?.message ?? apiMessage ?? "Something went wrong";
+  const listingErrorMessage =
+    error?.message ?? apiMessage ?? "Something went wrong";
 
   return (
     <main className="page-shell">
-      {/* Header */}
-      <div className="bg-white/100 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
-        <div className="listing-container py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-indigo-900 tracking-tight">
-              Products
-            </h1>
-            {!loading && (
-              <p className="text-sm text-slate-500 mt-0.5">
-                {totalCount} items available
-              </p>
-            )}
+      <section>
+        <div className="relative overflow-hidden bg-linear-to-r from-transparent via-[#faf7ff]/85 to-transparent">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+          >
+            <div className="absolute inset-y-0 right-0 w-[100%] overflow-hidden">
+              <Image
+                src="/99b67da4-359d-474e-9dac-8df713cb5e38.jpeg"
+                alt=""
+                fill
+                sizes="52vw"
+                className="object-cover object-center opacity-16 sm:opacity-18 lg:opacity-22 blur-[1px] scale-108"
+              />
+              <div className="absolute inset-0 bg-linear-to-l from-white/30 via-[#faf7ff]/86 to-[#faf7ff]/35 lg:from-white/15 lg:via-[#faf7ff]/72 lg:to-transparent" />
+            </div>
+            {/* <div className="absolute right-2 top-5 h-44 w-44 overflow-hidden rounded-full border border-white/55 shadow-[0_20px_36px_-22px_rgba(15,23,42,0.5)]">
+              <Image
+                src="/03787a2d-d881-43e8-b78f-d573b9558e55.jpeg"
+                alt=""
+                fill
+                sizes="176px"
+                className="object-cover opacity-70"
+              />
+            </div> */}
           </div>
 
-          <div className="flex gap-3 w-full sm:w-auto flex-wrap">
-            {/* Search */}
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="search-input"
-            />
-
-            {/* Category */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => onCategoryFilterChange(e.target.value)}
-              className="filter-select"
-            >
-              <option value={ALL_FILTER_VALUE}>All categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
+          <div className="relative listing-container grid grid-cols-1 lg:grid-cols-[1.35fr_.9fr] items-start gap-5 py-5 sm:py-6">
+            <div className="space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700">
+                Walton Smart Living Collection
+              </span>
+              <div className="space-y-2.5">
+                <h2 className="text-3xl sm:text-4xl leading-tight font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
+                  Smart Living Starts Here
+                </h2>
+                <p className="text-slate-600 text-sm sm:text-base max-w-xl">
+                  Discover innovative electronics and home essentials crafted
+                  for performance, comfort, and everyday convenience.
+                </p>
+              </div>
+              <div className="grid grid-flow-col auto-cols-[minmax(210px,1fr)] gap-2 overflow-x-auto py-1 sm:grid-cols-2 sm:grid-flow-row sm:auto-cols-auto sm:overflow-visible sm:gap-3 sm:pt-1">
+                {[
+                  {
+                    title: "Smart Entertainment",
+                    subtitle: "4K TVs and immersive sound",
+                  },
+                  {
+                    title: "Cooling Comfort",
+                    subtitle: "Efficient AC and climate control",
+                  },
+                  {
+                    title: "Home Essentials",
+                    subtitle: "Refrigerators and appliances",
+                  },
+                  {
+                    title: "Work & Study",
+                    subtitle: "Laptops and daily accessories",
+                  },
+                ].map((item, index) => (
+                  <article
+                    key={item.title}
+                    className="feature-card-animate min-w-0 shrink-0 rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-2.5 shadow-[0_10px_20px_-22px_rgba(15,23,42,0.45)] transition-transform duration-300 ease-out hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_16px_30px_-24px_rgba(15,23,42,0.45)] sm:py-3"
+                    style={{ animationDelay: `${120 + index * 90}ms` }}
+                  >
+                    <h3 className="text-sm font-semibold text-slate-800">
+                      {item.title}
+                    </h3>
+                    <p className="hidden sm:block mt-1 text-xs text-slate-500 leading-relaxed">
+                      {item.subtitle}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-flow-col auto-cols-[minmax(180px,1fr)] gap-2 overflow-x-auto py-1 lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-1 lg:gap-3 lg:overflow-visible lg:py-0 lg:self-center lg:pl-4 lg:border-l lg:border-slate-200/60">
+              {SERVICE_HIGHLIGHTS.map((item, index) => (
+                <div
+                  key={item.title}
+                  className="service-card-animate min-w-0 shrink-0 rounded-xl border border-slate-200/70 bg-white/60 px-3 py-2 transition-transform duration-300 ease-out hover:translate-x-0.5 lg:rounded-none lg:border-0 lg:bg-transparent lg:px-1 lg:py-2 lg:border-b lg:border-slate-200/70 lg:last:border-b-0"
+                  style={{ animationDelay: `${240 + index * 110}ms` }}
+                >
+                  <h3 className="text-sm font-semibold text-slate-800 tracking-tight">
+                    {item.title}
+                  </h3>
+                  <p className="hidden lg:block text-xs text-slate-500 mt-1 leading-relaxed">
+                    {item.subtitle}
+                  </p>
+                </div>
               ))}
-            </select>
-
-            {/* Price */}
-            <select
-              value={priceFilter}
-              onChange={(e) => onPriceFilterChange(e.target.value as PriceFilterValue)}
-              className="filter-select"
-            >
-              {PRICE_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Availability */}
-            <select
-              value={availabilityFilter}
-              onChange={(e) =>
-                onAvailabilityFilterChange(e.target.value as AvailabilityFilterValue)
-              }
-              className="filter-select"
-            >
-              {AVAILABILITY_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* Sort */}
-            <select
-              value={sort}
-              onChange={(e) => onSortChange(e.target.value as SortValue)}
-              className="filter-select"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="listing-container py-8">
         {/* Error */}
         {hasListingError && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
               <svg
-                className="w-8 h-8 text-red-400"
+                className="w-8 h-8 text-rose-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -148,6 +180,77 @@ const ProductListingPage = () => {
             </div>
             <p className="text-slate-700 font-medium">Something went wrong</p>
             <p className="text-slate-400 text-sm mt-1">{listingErrorMessage}</p>
+          </div>
+        )}
+
+        {/* Listing Header + Filters */}
+        {!loading && !hasListingError && (
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
+                Discover Walton Products
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">
+                {totalCount} items available
+              </p>
+            </div>
+
+            <div className="flex gap-3 w-full lg:w-auto lg:max-w-[68%] lg:justify-end flex-nowrap overflow-x-auto pb-1">
+              <select
+                value={categoryFilter}
+                onChange={(e) => onCategoryFilterChange(e.target.value)}
+                className="filter-select"
+              >
+                <option value={ALL_FILTER_VALUE}>All categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={priceFilter}
+                onChange={(e) =>
+                  onPriceFilterChange(e.target.value as PriceFilterValue)
+                }
+                className="filter-select"
+              >
+                {PRICE_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={availabilityFilter}
+                onChange={(e) =>
+                  onAvailabilityFilterChange(
+                    e.target.value as AvailabilityFilterValue
+                  )
+                }
+                className="filter-select"
+              >
+                {AVAILABILITY_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sort}
+                onChange={(e) => onSortChange(e.target.value as SortValue)}
+                className="filter-select"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
 
@@ -188,7 +291,7 @@ const ProductListingPage = () => {
         {/* Product Grid */}
         {!loading && !hasListingError && filteredAndSorted.length > 0 && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSorted.map((product, index) => (
                 <ProductCard
                   key={product.uid}
@@ -200,7 +303,7 @@ const ProductListingPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-12">
+              <div className="flex items-center justify-center gap-2 mt-14">
                 <button
                   onClick={onPreviousPage}
                   disabled={page === 0}
@@ -221,10 +324,10 @@ const ProductListingPage = () => {
                     <button
                       key={paginationItem}
                       onClick={() => onPageChange(paginationItem)}
-                      className={`w-9 h-9 rounded-xl text-sm font-medium transition ${
+                      className={`w-9 h-9 rounded-2xl text-sm font-semibold transition-all ${
                         page === paginationItem
-                          ? "bg-indigo-400 text-white shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                          ? "bg-slate-900 text-white shadow-[0_12px_24px_-14px_rgba(23,42,104,0.8)]"
+                          : "border border-slate-200 bg-white text-slate-600 hover:border-sky-300 hover:-translate-y-0.5"
                       }`}
                     >
                       {paginationItem + 1}

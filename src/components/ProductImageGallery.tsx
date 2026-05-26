@@ -29,7 +29,7 @@ const ProductImageGallery = ({
 
   if (validImages.length === 0) {
     return (
-      <div className="aspect-square bg-white rounded-2xl border border-slate-100 flex items-center justify-center">
+      <div className="aspect-square bg-linear-to-b from-white via-white to-violet-50/50 rounded-3xl border border-violet-100 flex items-center justify-center shadow-[0_20px_44px_-35px_rgba(67,56,202,0.34)]">
         <svg
           className="w-16 h-16 text-slate-300"
           fill="none"
@@ -50,13 +50,13 @@ const ProductImageGallery = ({
   return (
     <div className="flex flex-col gap-3">
       {/* Main Image */}
-      <div className="relative aspect-square bg-white rounded-2xl border border-slate-100 overflow-hidden group">
+      <div className="relative aspect-square bg-linear-to-b from-[#f5f1ff] via-[#f8f6ff] to-[#edf1ff] rounded-3xl border border-violet-100 overflow-hidden group shadow-[0_20px_44px_-35px_rgba(67,56,202,0.34)]">
         <Image
           src={validImages[currentIndex].url}
           alt={`${productName} - image ${currentIndex + 1}`}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-contain p-6 transition-opacity duration-300"
+          className="object-contain p-6 transition-all duration-300 group-hover:scale-105"
           loading="eager"
         />
 
@@ -69,7 +69,7 @@ const ProductImageGallery = ({
 
         {/* Image counter */}
         {validImages.length > 1 && (
-          <div className="absolute bottom-4 right-4 bg-black/40 text-white text-xs px-2.5 py-1 rounded-lg">
+          <div className="absolute bottom-4 right-4 bg-slate-900/65 text-white text-xs px-2.5 py-1 rounded-xl">
             {currentIndex + 1} / {validImages.length}
           </div>
         )}
@@ -79,7 +79,7 @@ const ProductImageGallery = ({
           <>
             <button
               onClick={handlePrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white/80 border border-slate-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white shadow-sm"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-white border border-violet-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:-translate-y-[52%] shadow-sm"
               aria-label="Previous image"
             >
               <svg
@@ -98,7 +98,7 @@ const ProductImageGallery = ({
             </button>
             <button
               onClick={handleNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-white/80 border border-slate-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white shadow-sm"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-white border border-violet-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:-translate-y-[52%] shadow-sm"
               aria-label="Next image"
             >
               <svg
@@ -126,10 +126,10 @@ const ProductImageGallery = ({
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
-              className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden transition-all duration-200 ${
+              className={`relative w-16 h-16 rounded-2xl border-2 overflow-hidden transition-all duration-200 ${
                 currentIndex === i
-                  ? "border-indigo-500 shadow-sm shadow-indigo-100"
-                  : "border-slate-200 hover:border-slate-300"
+                  ? "border-violet-300 shadow-sm shadow-violet-100"
+                  : "border-slate-200 hover:border-violet-200"
               }`}
               aria-label={`View image ${i + 1}`}
             >

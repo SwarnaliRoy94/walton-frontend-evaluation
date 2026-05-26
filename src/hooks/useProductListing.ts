@@ -17,6 +17,7 @@ import {
   getUniqueCategories,
 } from "@/lib/productListing";
 import { apolloClient } from "@/lib/apollo";
+import { useProductListingStore } from "@/store/productListingStore";
 
 const EMPTY_PRODUCTS: Product[] = [];
 const API_PAGE_LIMIT = 30;
@@ -48,9 +49,9 @@ const getPaginationItems = (
 };
 
 export const useProductListing = () => {
+  const search = useProductListingStore((state) => state.search);
   const [page, setPage] = useState<number>(0);
   const [sort, setSort] = useState<SortValue>(DEFAULT_SORT_VALUE);
-  const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState<PriceFilterValue>(ALL_FILTER_VALUE);
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_FILTER_VALUE);
@@ -65,6 +66,7 @@ export const useProductListing = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search.trim());
+      setPage(0);
     }, SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
@@ -80,10 +82,7 @@ export const useProductListing = () => {
       setApiMessage(undefined);
 
       try {
-        const filter: ProductFilterInput = {
-          isActive: null,
-          ...(debouncedSearch ? { enName: debouncedSearch } : {}),
-        };
+        const filter: ProductFilterInput = { isActive: null };
 
         let skip = 0;
         let expectedCount = 0;
@@ -138,7 +137,25 @@ export const useProductListing = () => {
         }
       } catch (caughtError) {
         if (!ignoreResponse) {
-          setError(caughtError as ApolloError | Error);
+          const apolloError = caughtError as ApolloError;
+          const networkStatusCode = (
+            apolloError.networkError as
+              | { statusCode?: number; response?: { status?: number } }
+              | undefined
+          )?.statusCode ?? (
+            apolloError.networkError as
+              | { statusCode?: number; response?: { status?: number } }
+              | undefined
+          )?.response?.status;
+
+          if (networkStatusCode === 429) {
+            setError(null);
+            setApiStatusCode(429);
+            setApiMessage("Too many requests. Please wait a moment and try again.");
+            return;
+          }
+
+          setError(apolloError);
           setAllProducts(EMPTY_PRODUCTS);
         }
       } finally {
@@ -153,23 +170,33 @@ export const useProductListing = () => {
     return () => {
       ignoreResponse = true;
     };
-  }, [debouncedSearch]);
+  }, []);
 
   const hasApiError =
     typeof apiStatusCode === "number" && apiStatusCode !== 200;
+
+  const searchedProducts = useMemo(() => {
+    if (!debouncedSearch) return allProducts;
+
+    const query = debouncedSearch.toLowerCase();
+    return allProducts.filter((product) => {
+      const enName = product.enName?.toLowerCase() ?? "";
+      return enName.includes(query);
+    });
+  }, [allProducts, debouncedSearch]);
 
   const categories = useMemo(() => {
     return getUniqueCategories(allProducts);
   }, [allProducts]);
 
   const filteredAndSortedAll = useMemo(() => {
-    return filterAndSortProducts(allProducts, {
+    return filterAndSortProducts(searchedProducts, {
       categoryFilter,
       availabilityFilter,
       priceFilter,
       sort,
     });
-  }, [allProducts, categoryFilter, availabilityFilter, priceFilter, sort]);
+  }, [searchedProducts, categoryFilter, availabilityFilter, priceFilter, sort]);
 
   const totalCount = filteredAndSortedAll.length;
   const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
@@ -184,11 +211,6 @@ export const useProductListing = () => {
   const paginationItems = useMemo(() => {
     return getPaginationItems(safePage, totalPages);
   }, [safePage, totalPages]);
-
-  const onSearchChange = (value: string): void => {
-    setSearch(value);
-    setPage(0);
-  };
 
   const onCategoryFilterChange = (value: string): void => {
     setCategoryFilter(value);
@@ -243,7 +265,6 @@ export const useProductListing = () => {
     categories,
     filteredAndSorted,
     paginationItems,
-    onSearchChange,
     onCategoryFilterChange,
     onPriceFilterChange,
     onAvailabilityFilterChange,

@@ -29,14 +29,14 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[420px] bg-teal-50 z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[430px] bg-linear-to-b from-sky-50 to-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <div>
-            <h2 className="text-base font-semibold text-indigo-900">
+            <h2 className="text-base font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
               Your Cart
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -47,7 +47,7 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-indigo-100 transition"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition"
           >
             <svg
               className="w-5 h-5"
@@ -99,7 +99,7 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
               return (
                 <div
                   key={item.selectedVariant.posItemCode}
-                  className="flex gap-4 bg-slate-50 border border-indigo-100 rounded-2xl p-3"
+                  className="flex gap-4 bg-white border border-slate-200 rounded-2xl p-3 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.75)]"
                 >
                   {/* Image */}
                   <div className="relative w-16 h-16 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0">
@@ -121,7 +121,7 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
                     <p className="text-sm font-medium text-slate-800 line-clamp-2 leading-snug">
                       {item.product.enName}
                     </p>
-                    <p className="text-sm font-semibold text-indigo-800">
+                    <p className="text-sm font-semibold text-slate-800">
                       ৳{(price * item.quantity).toLocaleString()}
                     </p>
 
@@ -188,14 +188,14 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="px-6 py-4 border-t border-slate-100 flex flex-col gap-3">
+          <div className="px-6 py-4 border-t border-slate-200 flex flex-col gap-3 bg-white/80">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-indigo-900">Total</span>
-              <span className="text-lg font-bold text-indigo-900">
+              <span className="text-sm text-slate-700">Total</span>
+              <span className="text-lg font-bold text-slate-900">
                 ৳{total.toLocaleString()}
               </span>
             </div>
-            <button className="w-full py-3.5 bg-indigo-300 text-white text-sm font-semibold rounded-xl hover:bg-indigo-400 active:scale-95 transition-all">
+            <button className="w-full py-3.5 bg-slate-900 text-white text-sm font-semibold rounded-2xl hover:bg-slate-800 active:scale-95 transition-all">
               Checkout
             </button>
             <button

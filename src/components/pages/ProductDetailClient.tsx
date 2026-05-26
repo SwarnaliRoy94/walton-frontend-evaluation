@@ -17,13 +17,15 @@ const AttributeSection = ({
   if (!data || data.length === 0) return null;
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-3">{title}</h3>
-      <div className="rounded-xl border border-indigo-50 overflow-hidden">
+      <h3 className="text-sm font-semibold text-slate-800 mb-3 [font-family:var(--font-space-grotesk)]">
+        {title}
+      </h3>
+      <div className="rounded-2xl border border-slate-200 overflow-hidden">
         {data.map((attr, i) => (
           <div
             key={i}
             className={`flex gap-4 px-4 py-3 text-sm ${
-              i % 2 === 0 ? "bg-slate-50" : "bg-white"
+              i % 2 === 0 ? "bg-violet-50/40" : "bg-white"
             }`}
           >
             <span className="text-slate-500 w-40 shrink-0">{attr.enLabel}</span>
@@ -73,7 +75,7 @@ const ProductDetailPage = () => {
       <main className="page-shell">
         <div className="detail-container">
           <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="aspect-square bg-white rounded-2xl" />
+            <div className="aspect-square bg-linear-to-b from-white via-white to-violet-50/50 rounded-2xl" />
             <div className="flex flex-col gap-4">
               <div className="h-6 bg-slate-200 rounded-full w-3/4" />
               <div className="h-4 bg-slate-100 rounded-full w-1/2" />
@@ -90,13 +92,13 @@ const ProductDetailPage = () => {
   if (error || statusCode !== 200 || !product) {
     return (
       <main className="page-shell flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center rounded-3xl border border-violet-100 bg-linear-to-b from-white via-white to-violet-50/50 px-8 py-10 shadow-[0_22px_50px_-34px_rgba(67,56,202,0.35)]">
           <p className="text-slate-700 font-medium">
             {message ?? "Product not found"}
           </p>
           <Link
             href="/products"
-            className="mt-4 inline-block text-sm text-indigo-600 hover:underline"
+            className="mt-4 inline-block text-sm text-sky-700 hover:underline"
           >
             ← Back to products
           </Link>
@@ -109,15 +111,15 @@ const ProductDetailPage = () => {
     <main className="page-shell">
       <div className="detail-container">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-400 mb-6">
+        <div className="flex items-center gap-2 text-sm text-slate-500 mb-7">
           <Link
             href="/products"
-            className="hover:text-indigo-800 transition-colors"
+            className="hover:text-slate-900 transition-colors"
           >
             Products
           </Link>
           <span>/</span>
-          <span className="text-indigo-800 line-clamp-1">{product.enName}</span>
+          <span className="text-slate-800 line-clamp-1">{product.enName}</span>
         </div>
 
         {/* Top Section */}
@@ -132,23 +134,23 @@ const ProductDetailPage = () => {
           {/* Product Info */}
           <div className="flex flex-col gap-5">
             <div>
-              <h1 className="text-xl font-semibold text-slate-800 leading-snug">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 leading-snug [font-family:var(--font-space-grotesk)]">
                 {product.enName}
               </h1>
             </div>
 
             {/* Price */}
-            <div className="flex items-start gap-3">
-              <span className="text-3xl font-bold text-indigo-900">
+            <div className="flex items-start gap-3 rounded-2xl border border-violet-100 bg-linear-to-r from-white via-white to-violet-50/60 p-4 shadow-[0_20px_40px_-34px_rgba(67,56,202,0.34)]">
+              <span className="text-3xl font-bold text-slate-900">
                 ৳{sellingPrice.toLocaleString()}
               </span>
               {hasDiscount && (
                 <div className="ml-auto flex flex-col items-end gap-1 text-right">
-                  <span className="text-lg text-red-700 line-through">
+                  <span className="text-base text-rose-700 line-through">
                     ৳{mrpPrice.toLocaleString()}
                   </span>
                   {discountSummary && (
-                    <span className="text-sm font-semibold text-green-700 bg-green-50 px-2.5 py-1 rounded-lg border border-green-200">
+                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                       {discountSummary}
                     </span>
                   )}
@@ -185,10 +187,10 @@ const ProductDetailPage = () => {
                     <button
                       key={v.posItemCode}
                       onClick={() => onVariantChange(v.posItemCode)}
-                      className={`px-3 py-2 text-xs rounded-xl border transition ${
+                      className={`px-3 py-2 text-xs rounded-2xl border transition ${
                         selectedVariant?.posItemCode === v.posItemCode
-                          ? "border-indigo-500 bg-indigo-50 text-indigo-700 font-medium"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                          ? "border-violet-300 bg-violet-50 text-violet-700 font-semibold"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-violet-200"
                       } ${
                         v.quantity === 0 ? "opacity-40 cursor-not-allowed" : ""
                       }`}
@@ -205,7 +207,7 @@ const ProductDetailPage = () => {
             {/* CTA */}
             <div className="flex flex-col gap-3 mt-2">
               {isInCart ? (
-                <div className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold bg-green-50 text-green-700 border border-green-200 flex items-center justify-between gap-3">
+                <div className="w-full py-3.5 px-4 rounded-2xl text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-between gap-3">
                   <span className="text-left">Added to cart</span>
                   <div className="flex items-center gap-2">
                     <button
@@ -251,10 +253,10 @@ const ProductDetailPage = () => {
                 <button
                   onClick={onAddToCart}
                   disabled={isOutOfStock}
-                  className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  className={`w-full py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                     isOutOfStock
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-indigo-200 text-indigo-900 hover:bg-indigo-400 hover:text-white active:scale-95"
+                      : "bg-slate-900 text-white hover:bg-indigo-900 hover:-translate-y-0.5 active:scale-95"
                   }`}
                 >
                   {isOutOfStock ? "Out of stock" : "Add to cart"}
@@ -266,7 +268,7 @@ const ProductDetailPage = () => {
 
         {/* Special Features */}
         <div className="mt-10">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="bg-linear-to-b from-white via-white to-violet-50/45 rounded-3xl border border-violet-100 p-6 shadow-[0_22px_45px_-35px_rgba(67,56,202,0.32)]">
             {specialFeatures.length > 0 ? (
               <AttributeSection title="Special Features" data={specialFeatures} />
             ) : (
@@ -286,14 +288,14 @@ const ProductDetailPage = () => {
         {tabs.length > 0 && (
           <div className="mt-12">
             {/* Tab Headers */}
-            <div className="flex gap-1 border-b border-slate-200 mb-6">
+            <div className="flex gap-1 border-b border-slate-200 mb-6 overflow-x-auto pb-1">
               {tabs.map((tab, i) => (
                 <button
                   key={i}
                   onClick={() => onActiveTabChange(i)}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-xl transition ${
+                  className={`px-5 py-2.5 text-sm font-semibold rounded-t-2xl whitespace-nowrap transition ${
                     activeTab === i
-                      ? "bg-white border border-b-white border-slate-200 text-indigo-800 -mb-px"
+                      ? "bg-violet-50/65 border border-b-violet-50 border-violet-200 text-slate-900 -mb-px [font-family:var(--font-space-grotesk)]"
                       : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
@@ -303,7 +305,7 @@ const ProductDetailPage = () => {
             </div>
 
             {/* Tab Content */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <div className="bg-linear-to-b from-white via-white to-violet-50/45 rounded-3xl border border-violet-100 p-6 shadow-[0_22px_45px_-35px_rgba(67,56,202,0.32)]">
               <AttributeSection
                 title={tabs[activeTab].label}
                 data={tabs[activeTab].data ?? null}
