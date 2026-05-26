@@ -37,7 +37,6 @@ const ProductListingPage = () => {
   const {
     page,
     sort,
-    search,
     priceFilter,
     categoryFilter,
     availabilityFilter,
@@ -50,7 +49,6 @@ const ProductListingPage = () => {
     categories,
     filteredAndSorted,
     paginationItems,
-    onSearchChange,
     onCategoryFilterChange,
     onPriceFilterChange,
     onAvailabilityFilterChange,
@@ -60,104 +58,11 @@ const ProductListingPage = () => {
     onNextPage,
   } = useProductListing();
   const hasListingError = Boolean(error) || hasApiError;
-  const listingErrorMessage = error?.message ?? apiMessage ?? "Something went wrong";
+  const listingErrorMessage =
+    error?.message ?? apiMessage ?? "Something went wrong";
 
   return (
     <main className="page-shell">
-      <div className="bg-slate-900 text-slate-100 text-xs sm:text-sm">
-        <div className="listing-container py-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-          <span className="font-medium tracking-wide">
-            Walton Electronics Sale is Live
-          </span>
-          <span className="text-slate-300">Up to 30% Off on selected products</span>
-          <button className="ml-1 rounded-full border border-slate-500 px-3 py-0.5 text-[11px] font-semibold hover:bg-slate-800 transition-colors">
-            Shop Now
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-white/82 backdrop-blur-xl border-b border-slate-200/70">
-        <div className="listing-container py-5 grid grid-cols-1 lg:grid-cols-[1.45fr_1fr] gap-6 lg:items-start">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight [font-family:var(--font-space-grotesk)]">
-              Discover Walton Products
-            </h1>
-            {!loading && (
-              <p className="text-sm text-slate-500 mt-1">
-                {totalCount} items available
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 w-full">
-            <input
-              type="text"
-              placeholder="Search by product name..."
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="search-input w-full sm:w-full"
-            />
-
-            <div className="flex gap-3 w-full flex-nowrap overflow-x-auto pb-1">
-              {/* Category */}
-              <select
-                value={categoryFilter}
-                onChange={(e) => onCategoryFilterChange(e.target.value)}
-                className="filter-select"
-              >
-                <option value={ALL_FILTER_VALUE}>All categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-
-              {/* Price */}
-              <select
-                value={priceFilter}
-                onChange={(e) => onPriceFilterChange(e.target.value as PriceFilterValue)}
-                className="filter-select"
-              >
-                {PRICE_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-
-              {/* Availability */}
-              <select
-                value={availabilityFilter}
-                onChange={(e) =>
-                  onAvailabilityFilterChange(e.target.value as AvailabilityFilterValue)
-                }
-                className="filter-select"
-              >
-                {AVAILABILITY_FILTER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-
-              {/* Sort */}
-              <select
-                value={sort}
-                onChange={(e) => onSortChange(e.target.value as SortValue)}
-                className="filter-select"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <section className="listing-container pt-6">
         <div className="rounded-[30px] border border-slate-200 bg-linear-to-r from-slate-100 via-[#faf7ff] to-sky-50 overflow-hidden shadow-[0_24px_46px_-34px_rgba(15,23,42,0.45)]">
           <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_.9fr] items-start gap-5 p-6 sm:p-8">
@@ -170,8 +75,8 @@ const ProductListingPage = () => {
                   Smart Living Starts Here
                 </h2>
                 <p className="text-slate-600 text-sm sm:text-base max-w-xl">
-                  Discover innovative electronics and home essentials crafted for
-                  performance, comfort, and everyday convenience.
+                  Discover innovative electronics and home essentials crafted
+                  for performance, comfort, and everyday convenience.
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
@@ -289,13 +194,74 @@ const ProductListingPage = () => {
         {/* Product Grid */}
         {!loading && !hasListingError && filteredAndSorted.length > 0 && (
           <>
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
-                Featured Products
-              </h2>
-              <button className="text-sm font-semibold text-sky-700 hover:text-sky-900 transition-colors">
-                View all products →
-              </button>
+            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 [font-family:var(--font-space-grotesk)]">
+                  Discover Walton Products
+                </h2>
+                {!loading && (
+                  <p className="text-sm text-slate-500 mt-1">
+                    {totalCount} items available
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 w-full lg:w-auto lg:max-w-[68%] lg:justify-end flex-nowrap overflow-x-auto pb-1">
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => onCategoryFilterChange(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value={ALL_FILTER_VALUE}>All categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={priceFilter}
+                  onChange={(e) =>
+                    onPriceFilterChange(e.target.value as PriceFilterValue)
+                  }
+                  className="filter-select"
+                >
+                  {PRICE_FILTER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={availabilityFilter}
+                  onChange={(e) =>
+                    onAvailabilityFilterChange(
+                      e.target.value as AvailabilityFilterValue
+                    )
+                  }
+                  className="filter-select"
+                >
+                  {AVAILABILITY_FILTER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={sort}
+                  onChange={(e) => onSortChange(e.target.value as SortValue)}
+                  className="filter-select"
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSorted.map((product, index) => (

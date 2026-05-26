@@ -17,6 +17,7 @@ import {
   getUniqueCategories,
 } from "@/lib/productListing";
 import { apolloClient } from "@/lib/apollo";
+import { useProductListingStore } from "@/store/productListingStore";
 
 const EMPTY_PRODUCTS: Product[] = [];
 const API_PAGE_LIMIT = 30;
@@ -48,9 +49,9 @@ const getPaginationItems = (
 };
 
 export const useProductListing = () => {
+  const search = useProductListingStore((state) => state.search);
   const [page, setPage] = useState<number>(0);
   const [sort, setSort] = useState<SortValue>(DEFAULT_SORT_VALUE);
-  const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState<PriceFilterValue>(ALL_FILTER_VALUE);
   const [categoryFilter, setCategoryFilter] = useState<string>(ALL_FILTER_VALUE);
@@ -65,6 +66,7 @@ export const useProductListing = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search.trim());
+      setPage(0);
     }, SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
@@ -185,11 +187,6 @@ export const useProductListing = () => {
     return getPaginationItems(safePage, totalPages);
   }, [safePage, totalPages]);
 
-  const onSearchChange = (value: string): void => {
-    setSearch(value);
-    setPage(0);
-  };
-
   const onCategoryFilterChange = (value: string): void => {
     setCategoryFilter(value);
     setPage(0);
@@ -243,7 +240,6 @@ export const useProductListing = () => {
     categories,
     filteredAndSorted,
     paginationItems,
-    onSearchChange,
     onCategoryFilterChange,
     onPriceFilterChange,
     onAvailabilityFilterChange,
