@@ -82,6 +82,8 @@ export const useProductListing = () => {
       setApiMessage(undefined);
 
       try {
+        // Fetch broad product pages once, then apply search/filter client-side.
+        // This avoids repeated network bursts while typing (rate-limit friendly).
         const filter: ProductFilterInput = { isActive: null };
 
         let skip = 0;
@@ -151,6 +153,7 @@ export const useProductListing = () => {
           if (networkStatusCode === 429) {
             setError(null);
             setApiStatusCode(429);
+            // Surface a user-friendly message instead of crashing listing state.
             setApiMessage("Too many requests. Please wait a moment and try again.");
             return;
           }
@@ -179,6 +182,7 @@ export const useProductListing = () => {
     if (!debouncedSearch) return allProducts;
 
     const query = debouncedSearch.toLowerCase();
+    // `enName` is the most reliable searchable field from this API contract.
     return allProducts.filter((product) => {
       const enName = product.enName?.toLowerCase() ?? "";
       return enName.includes(query);

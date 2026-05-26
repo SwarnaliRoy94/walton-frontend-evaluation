@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 const UPSTREAM_GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL;
 
 export async function POST(request: Request) {
+  // Browser requests go through same-origin API route to avoid CORS issues
+  // and keep external endpoint details outside client networking logic.
   if (!UPSTREAM_GRAPHQL_URL) {
     return NextResponse.json(
       { error: "Missing upstream GraphQL URL configuration." },
@@ -38,4 +40,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

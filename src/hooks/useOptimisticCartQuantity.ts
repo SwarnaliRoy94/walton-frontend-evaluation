@@ -18,6 +18,7 @@ export const useOptimisticCartQuantity = (
   );
 
   const runOptimisticAction = (action: CartOptimisticAction): void => {
+    // React 19 requires optimistic updates to run inside a transition/action.
     startTransition(() => {
       applyCartOptimistic(action);
     });

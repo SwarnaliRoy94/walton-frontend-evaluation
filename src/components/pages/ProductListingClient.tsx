@@ -183,7 +183,8 @@ const ProductListingPage = () => {
           </div>
         )}
 
-        {/* Listing Header + Filters */}
+        {/* Listing Header + Filters
+            Keep this visible even on empty search results so users can recover quickly. */}
         {!loading && !hasListingError && (
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
