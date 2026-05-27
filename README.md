@@ -2,6 +2,154 @@
 
 This is a product listing and product details webpage with Next.js 16 and GraphQL as the frontend technology.
 
+## Setup
+
+### Environment & Versions
+
+Developed and tested with:
+
+- Node.js: 24.4.0
+- Next.js: 16.2.6
+- React: 19.2.4
+- React DOM: 19.2.4
+- Apollo Client: 4.2.0
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create `.env.local`:
+
+```bash
+NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
+```
+
+3. Start development server:
+
+```bash
+npm run dev
+```
+
+4. Open:
+
+```text
+http://localhost:3000
+```
+
+### Run Notes / Troubleshooting
+
+If the app does not run correctly:
+
+1. Check Node version:
+
+```bash
+node -v
+```
+
+Use Node `24.4.0` (or at least Node `20+`).
+
+2. Reinstall dependencies cleanly:
+
+```bash
+rm -rf node_modules package-lock.json .next
+npm install
+```
+
+3. Ensure `.env.local` exists:
+
+```env
+NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
+```
+
+4. Start development server:
+
+```bash
+npm run dev
+```
+
+5. If GraphQL/CORS/429 issues appear:
+- This project proxies GraphQL through `/api/graphql` to avoid browser CORS issues.
+- A `429 Too Many Requests` response means upstream API rate limiting; wait briefly and retry.
+
+## Available Scripts
+
+- `npm run dev` - run development server
+- `npm run build` - create production build
+- `npm run start` - run production server
+- `npm run lint` - run ESLint
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript (strict mode)
+- Apollo Client
+- Zustand (persisted cart + shared listing search state)
+- Tailwind CSS v4
+
+## Implemented Features
+
+- Product listing page with server-side pagination.
+- Client-side sorting (price asc/desc, rating asc/desc).
+- Client-side filters (category, price range, stock availability, rating).
+- Search shared between Header input and product listing via Zustand store.
+- Product cards with discount ribbon (`% OFF`), MRP vs selling price, save amount, and variant chips.
+- Add-to-cart CTA that switches to quantity controls and remove action.
+- Product details page with image gallery, variant selection, stock/price/discount summary, and cart controls.
+- Special Features section with fallback copy if empty.
+- Additional tabbed attribute sections from API data.
+- Global cart drawer with increment/decrement/remove, total calculation, and clear cart.
+- Persisted cart state via localStorage (`walton-cart`).
+- Above-the-fold image loading optimizations for better LCP behavior.
+- React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
+- Subtle motion design with staggered fade/slide hero/service highlights and responsive mobile compaction.
+- Explicit Server/Client boundary with server route/layout entries and isolated interactive client islands.
+
+## Project Structure
+
+```text
+src/
+  app/
+    layout.tsx                  # Server layout entry
+    page.tsx                    # Redirects / to /products (preserves query params)
+    products/page.tsx           # Server route entry -> ProductListingClient
+    products/[id]/page.tsx      # Server route entry -> ProductDetailClient
+    api/graphql/route.ts        # Server-side proxy for GraphQL requests
+  components/
+    pages/
+      ProductListingClient.tsx
+      ProductDetailClient.tsx
+    ProductCard.tsx
+    ProductImageGallery.tsx
+    Header.tsx
+    Footer.tsx
+    Cart/CartDrawer.tsx
+  constants/
+    productListing.ts
+    productDetail.ts
+    footer.ts
+  graphql/
+    queries.ts
+  hooks/
+    useProductListing.ts
+    useProductDetail.ts
+    useProductCard.ts
+    useOptimisticCartQuantity.ts
+  lib/
+    apollo.ts
+    apolloWrapper.tsx
+    pricing.ts
+    productListing.ts
+    safeHtml.tsx
+  store/
+    cartStore.ts
+    productListingStore.ts
+  types/
+    index.ts
+```
+
 ## Architecture Decisions and Trade-offs
 
 ### 1) State Management: Zustand over Redux / Context API
@@ -51,7 +199,7 @@ Trade-off:
 Decision:
 Keep route entries and layout as Server Components, and isolate interactive UI in Client Components.
 
-Reason :
+Reason:
 - Makes boundaries explicit in App Router architecture.
 - Keeps client-side hooks/state where interaction is required.
 - Better aligns with performance-oriented Next.js patterns.
@@ -66,8 +214,7 @@ When building the product detail tabs (Warranty, Terms, Basic Info etc.), I noti
 The quick fix was `dangerouslySetInnerHTML`, which worked, but I wasn't comfortable leaving raw API HTML unfiltered — if the content ever contains a `<script>` tag or malicious markup, it would execute directly in the browser.
 
 So I installed `dompurify` to sanitize the HTML before rendering, and `html-react-parser` to convert the cleaned HTML into proper React nodes.
-It adds two dependencies and a small rendering step, but I assume it's the right call for content coming from an external API where you don't fully
-control what gets stored.
+It adds two dependencies and a small rendering step, but I assume it's the right call for content coming from an external API where you don't fully control what gets stored.
 
 ### 6) Next.js image host policy (`remotePatterns`)
 
@@ -76,150 +223,3 @@ While building the product listing and detail pages, I noticed product images we
 To avoid repeatedly hitting this during development, I switched to a wildcard `hostname: "**"` pattern that accepts any HTTPS image source. This kept the focus on building features rather than chasing hostnames.
 
 I'm aware this is broader than ideal for production. Once the full host inventory is confirmed, it can be restricted back to explicit trusted hostnames only.
-
-## Tech Stack
-
-- Next.js 16 (App Router)
-- React 19
-- TypeScript (strict mode)
-- Apollo Client
-- Zustand (persisted cart + shared listing search state)
-- Tailwind CSS v4
-
-## Implemented Features
-
-- Product listing page with server-side pagination.
-- Client-side sorting (price asc/desc, rating asc/desc).
-- Client-side filters (category, price range, stock availability, rating).
-- Search shared between Header input and product listing via Zustand store.
-- Product cards with discount ribbon (`% OFF`), MRP vs selling price, save amount, and variant chips.
-- Add-to-cart CTA that switches to quantity controls and remove action.
-- Product details page with image gallery, variant selection, stock/price/discount summary, and cart controls.
-- Special Features section with fallback copy if empty.
-- Additional tabbed attribute sections from API data.
-- Global cart drawer with increment/decrement/remove, total calculation, and clear cart.
-- Persisted cart state via localStorage (`walton-cart`).
-- Above-the-fold image loading optimizations for better LCP behavior.
-- React 19 `useOptimistic` for cart quantity interactions on both PLP and PDP.
-- Explicit Server/Client boundary with server route/layout entries and isolated interactive client islands.
-
-## Project Structure
-
-```text
-src/
-  app/
-    layout.tsx                  # Server layout entry
-    page.tsx                    # Redirects / to /products (preserves query params)
-    products/page.tsx           # Server route entry -> ProductListingClient
-    products/[id]/page.tsx      # Server route entry -> ProductDetailClient
-  components/
-    pages/
-      ProductListingClient.tsx
-      ProductDetailClient.tsx
-    ProductCard.tsx
-    ProductImageGallery.tsx
-    Header.tsx
-    Footer.tsx
-    Cart/CartDrawer.tsx
-  constants/
-    productListing.ts
-    productDetail.ts
-    footer.ts
-  graphql/
-    queries.ts
-  hooks/
-    useProductListing.ts
-    useProductDetail.ts
-    useProductCard.ts
-    useOptimisticCartQuantity.ts
-  lib/
-    apollo.ts
-    apolloWrapper.tsx
-    pricing.ts
-    productListing.ts
-    safeHtml.tsx
-  store/
-    cartStore.ts
-    productListingStore.ts
-  types/
-    index.ts
-```
-
-## Setup
-
-## Environment & Versions
-
-Developed and tested with:
-
-- Node.js: 24.4.0
-- Next.js: 16.2.6
-- React: 19.2.4
-- React DOM: 19.2.4
-- Apollo Client: 4.2.0
-
-
-1. Install dependencies:
-
-```bash
-npm install
-```
-
-2. Create `.env.local`:
-
-```bash
-NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
-```
-
-3. Start development server:
-
-```bash
-npm run dev
-```
-
-4. Open:
-
-```text
-http://localhost:3000
-```
-
-## Run Notes / Troubleshooting
-
-If the app does not run correctly:
-
-1. Check Node version:
-
-```bash
-node -v
-```
-
-Use Node `24.4.0` (or at least Node `20+`).
-
-2. Reinstall dependencies cleanly:
-
-```bash
-rm -rf node_modules package-lock.json .next
-npm install
-```
-
-3. Ensure `.env.local` exists:
-
-```env
-NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
-```
-
-4. Start development server:
-
-```bash
-npm run dev
-```
-
-5. If GraphQL/CORS/429 issues appear:
-- This project proxies GraphQL through `/api/graphql` to avoid browser CORS issues.
-- A `429 Too Many Requests` response means upstream API rate limiting; wait briefly and retry.
-
-## Available Scripts
-
-- `npm run dev` - run development server
-- `npm run build` - create production build
-- `npm run start` - run production server
-- `npm run lint` - run ESLint
