@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PRODUCT_DETAIL_TAB_CONFIGS } from "@/constants/productDetail";

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ApolloError } from "@apollo/client";
 import { GET_PRODUCTS } from "@/graphql/queries";
 import { GetProductsResponse, Product, ProductFilterInput } from "@/types";
 import {
@@ -78,7 +77,7 @@ export const useProductListing = () => {
     useState<AvailabilityFilterValue>(ALL_FILTER_VALUE);
   const [allProducts, setAllProducts] = useState<Product[]>(EMPTY_PRODUCTS);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<ApolloError | Error | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [apiStatusCode, setApiStatusCode] = useState<number | undefined>();
   const [apiMessage, setApiMessage] = useState<string | undefined>();
 
@@ -158,7 +157,9 @@ export const useProductListing = () => {
         }
       } catch (caughtError) {
         if (!ignoreResponse) {
-          const apolloError = caughtError as ApolloError;
+          const apolloError = caughtError as Error & {
+            networkError?: { statusCode?: number; response?: { status?: number } };
+          };
           const networkStatusCode = (
             apolloError.networkError as
               | { statusCode?: number; response?: { status?: number } }
