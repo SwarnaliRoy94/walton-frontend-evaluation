@@ -20,7 +20,7 @@ Developed and tested with:
 npm install
 ```
 
-2. Create `.env.local`:
+2. Create `.env.local` at root of the project:
 
 ```bash
 NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
