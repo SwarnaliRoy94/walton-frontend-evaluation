@@ -147,6 +147,17 @@ src/
 
 ## Setup
 
+## Environment & Versions
+
+Developed and tested with:
+
+- Node.js: 24.4.0
+- Next.js: 16.2.6
+- React: 19.2.4
+- React DOM: 19.2.4
+- Apollo Client: 4.2.0
+
+
 1. Install dependencies:
 
 ```bash
@@ -156,7 +167,7 @@ npm install
 2. Create `.env.local`:
 
 ```bash
-NEXT_PUBLIC_GRAPHQL_URL= (backend url given by walton)
+NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
 ```
 
 3. Start development server:
@@ -170,6 +181,41 @@ npm run dev
 ```text
 http://localhost:3000
 ```
+
+## Run Notes / Troubleshooting
+
+If the app does not run correctly:
+
+1. Check Node version:
+
+```bash
+node -v
+```
+
+Use Node `24.4.0` (or at least Node `20+`).
+
+2. Reinstall dependencies cleanly:
+
+```bash
+rm -rf node_modules package-lock.json .next
+npm install
+```
+
+3. Ensure `.env.local` exists:
+
+```env
+NEXT_PUBLIC_GRAPHQL_URL= endpoint given by walton
+```
+
+4. Start development server:
+
+```bash
+npm run dev
+```
+
+5. If GraphQL/CORS/429 issues appear:
+- This project proxies GraphQL through `/api/graphql` to avoid browser CORS issues.
+- A `429 Too Many Requests` response means upstream API rate limiting; wait briefly and retry.
 
 ## Available Scripts
 
